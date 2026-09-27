@@ -55,6 +55,7 @@
         </header>
         <canvas class="hero-canvas" role="img"
                 aria-label="The bank of the Buriganga in Dhaka in 1610, reconstructed. A plastic bag falls onto the mud. Four centuries pass: boats come and go, the city grows and litter piles up, but the bag stays exactly where it fell. The scene ends on a photograph of the same bank today."></canvas>
+        <svg class="hero-ring" aria-hidden="true" focusable="false"><circle class="hero-ring__halo"/><circle class="hero-ring__line"/></svg>
         <p class="hero-year" aria-hidden="true" id="year">1610</p>
         <div class="hero-loading" aria-hidden="true"></div>
         <div class="hero-card hero-card--three">
@@ -73,7 +74,7 @@
     <section class="story" id="story" tabindex="-1">
       <header class="story-head">
         <h1><span>A city changes.</span> <span>Plastic remains.</span></h1>
-        <p class="story-dek">Bangladesh generates around 3,000 tonnes of plastic waste every day, and much of it ends up in the country’s river system.</p>
+        <p class="story-dek">Bangladesh generates around <strong class="hl">3,000</strong> tonnes of plastic waste every day, and much of it ends up in the country’s river system.</p>
         <div class="story-meta">
           <p>By <strong>Pinaki Roy</strong></p>
           <p><time datetime="2026-09">September 2026</time></p>
@@ -94,12 +95,12 @@
         </figure>
 
         <div class="prose">
-          <p>Polyethylene terephthalate (PET), the polymer used in bottles and food packaging, takes an estimated <strong>450 years</strong> to break down, leaching microplastics and chemicals into the environment and contaminating food.</p>
+          <p>Polyethylene Terephthalate (PET), the polymer used in bottles and food packaging, takes an estimated <strong class="hl">450 years</strong> to break down, quietly leaching microplastics and chemicals into the environment and contaminating food.</p>
         </div>
 
         <figure class="report-chart report-chart--time reveal" id="chart-time" aria-labelledby="time-title">
           <figcaption class="chart-heading">
-            <h2 id="time-title">A PET bottle thrown away today could take until 2476 to break down.</h2>
+            <h2 id="time-title">A PET bottle thrown away today could take until <strong class="hl">2476</strong> to break down.</h2>
             <p class="chart-deck">The estimated breakdown time is longer than the 416 years since the Mughal fleet anchored at Chandni Ghat.</p>
           </figcaption>
           <div class="time-scale" role="img" aria-label="A timeline from 1610 to 2476. The 416 years since Islam Khan’s fleet anchored at Chandni Ghat are shorter than the estimated 450 years a PET bottle takes to break down, which would run from 2026 to 2476.">
@@ -112,7 +113,7 @@
         </figure>
 
         <div class="prose">
-          <p>A 2025 study titled <cite>Health risk assessment of microplastics contamination in the daily diet of South Asian countries</cite> found microplastics were significantly more common in fish caught from the Buriganga than in fish from the Bay of Bengal.</p>
+          <p>A 2025 study titled “<cite>Health risk assessment of microplastics contamination in the daily diet of South Asian countries</cite>” found microplastics were significantly more common in fish caught from the Buriganga than in fish from the Bay of Bengal.</p>
           <p>Experts say unregulated manufacturing of single-use plastic, inadequate recycling systems, a lack of public awareness and weak enforcement of existing laws have brought the country’s rivers to this point.</p>
         </div>
 
@@ -127,45 +128,44 @@
           </header>
 
           <div class="prose">
-            <p>The plastic industry is booming. It employs about <strong>1.5 million people</strong>, with over <strong>6,000 manufacturing units</strong> operating in Bangladesh, according to the government’s Invest Bangladesh website. The data puts the industry’s estimated growth rate at 20 percent.</p>
+            <p>The plastic industry is booming. It employs about <strong>1.5 million people</strong>, with over <strong>6,000 manufacturing units</strong> operating in Bangladesh, according to the government’s Invest Bangladesh website. About 80 percent of these are small and medium enterprises, while there are 450 export-oriented firms. Bangladesh produces more than 2,500 types of plastic products across sectors including packaging, construction, textiles, consumer goods, pharmaceuticals, automotive, and electronics. Around 17 percent of the sector’s output is exported, reflecting growing global competitiveness. The data puts the industry’s estimated growth rate at 20 percent.</p>
             <p>A World Bank report put Bangladesh’s annual plastic waste at close to 977,000 tonnes in 2020. In Dhaka, the daily total rose from 178 tonnes in 2005 to roughly 646 tonnes in 2020.</p>
           </div>
 
-          <figure class="report-chart report-chart--growth reveal" id="chart-growth" aria-labelledby="growth-title" aria-describedby="growth-description">
-            <figcaption class="chart-heading">
-              <h3 id="growth-title">More plastic, every day.</h3>
-              <p class="chart-deck" id="growth-description">Dhaka generated 646 tonnes of plastic waste a day in 2020, up from 178 tonnes in 2005.</p>
+          <figure class="fl-chart fl-chart--percapita reveal" id="chart-percapita" aria-labelledby="percapita-title" aria-describedby="percapita-description">
+            <div class="fl-bg" aria-hidden="true"></div>
+            <figcaption class="fl-heading">
+              <h3 class="fl-title" id="percapita-title">Each person in <span class="fl-chip fl-chip--dhaka">Dhaka</span> uses about two and a half times more plastic than the average urban dweller in <span class="fl-chip fl-chip--bd">Bangladesh</span></h3>
+              <p class="fl-deck" id="percapita-description">Driven by urbanisation, plastic use has tripled in Bangladesh’s cities <strong>since 2005</strong>. The average person used <strong>3 kg</strong> a year in 2005. In 2020, it increased to <strong>9 kg.</strong></p>
             </figcaption>
-            <div class="growth-layout">
-              <p class="growth-finding"><strong>3.6<span>×</span></strong><span>as much daily waste in 15 years</span></p>
-              <div class="growth-comparison" role="img" aria-label="Zero-based bars compare 178 tonnes of plastic waste per day in Dhaka in 2005 with 646 tonnes per day in 2020. The 3.6 times multiplier is rounded from 646 divided by 178.">
-                <p class="chart-unit" aria-hidden="true">Tonnes of plastic waste per day</p>
-                <div class="growth-row" aria-hidden="true">
-                  <div class="growth-row-label"><span>2005</span><strong>178</strong></div>
-                  <div class="growth-track"><div class="growth-bar growth-bar--then" style="--bar-size:25.428571%"></div></div>
+            <div class="pc-plot" role="img" aria-label="Plastic used per person, in kilograms a year. 2005: urban Bangladesh 3.01, Dhaka 9.2. 2014: urban Bangladesh 3.5, Dhaka 17.2. 2020: urban Bangladesh 9, Dhaka 22.25. Each person in Dhaka consumed 3.05 times more plastic than the rest of Bangladesh’s urban areas in 2005, 4.91 times more in 2014 and 2.44 times more in 2020.">
+              <div class="pc-year" data-tip-title="In 2005" data-tip="Each person in Dhaka consumed 3.05 times more plastic than the rest of Bangladesh’s urban areas.">
+                <p class="pc-year-label">2005</p>
+                <div class="pc-bars">
+                  <div class="pc-col pc-col--bd" style="--v:12.542%"><span class="pc-bar"></span><span class="pc-val">3.01</span></div>
+                  <div class="pc-col pc-col--dhaka" style="--v:38.333%"><span class="pc-bar"></span><span class="pc-val">9.2</span></div>
                 </div>
-                <div class="growth-row" aria-hidden="true">
-                  <div class="growth-row-label"><span>2020</span><strong>646</strong></div>
-                  <div class="growth-track"><div class="growth-bar growth-bar--now" style="--bar-size:92.285714%"></div></div>
+              </div>
+              <div class="pc-year" data-tip-title="In 2014" data-tip="Each person in Dhaka consumed 4.91 times more plastic than the rest of Bangladesh’s urban areas.">
+                <p class="pc-year-label">2014</p>
+                <div class="pc-bars">
+                  <div class="pc-col pc-col--bd" style="--v:14.583%"><span class="pc-bar"></span><span class="pc-val">3.5</span></div>
+                  <div class="pc-col pc-col--dhaka" style="--v:71.667%"><span class="pc-bar"></span><span class="pc-val">17.2</span></div>
                 </div>
-                <div class="growth-axis" aria-hidden="true">
-                  <span style="--tick:0%">0</span><span style="--tick:28.571429%">200</span><span style="--tick:57.142857%">400</span><span style="--tick:85.714286%">600</span>
+              </div>
+              <div class="pc-year" data-tip-title="In 2020" data-tip="Each person in Dhaka consumed 2.44 times more plastic than the rest of Bangladesh’s urban areas.">
+                <p class="pc-year-label">2020</p>
+                <div class="pc-bars">
+                  <div class="pc-col pc-col--bd" style="--v:37.5%"><span class="pc-bar"></span><span class="pc-val">9</span></div>
+                  <div class="pc-col pc-col--dhaka" style="--v:92.708%"><span class="pc-bar"></span><span class="pc-val">22.25</span></div>
                 </div>
               </div>
             </div>
-            <p class="chart-source">Source: <a href="https://blogs.worldbank.org/en/endpovertyinsouthasia/tackling-plastic-pollution-green-growth-bangladesh" target="_blank" rel="noopener noreferrer">World Bank, June 2021</a>. Published figures: 178 tonnes a day in 2005 and 646 in 2020.</p>
-            <details class="chart-data">
-              <summary>Read the chart data</summary>
-              <table>
-                <caption>Dhaka’s daily plastic waste</caption>
-                <thead><tr><th scope="col">Year</th><th scope="col">Tonnes per day</th><th scope="col">Basis</th></tr></thead>
-                <tbody><tr><th scope="row">2005</th><td>178</td><td>Published World Bank figure</td></tr><tr><th scope="row">2020</th><td>646</td><td>Published World Bank figure</td></tr></tbody>
-              </table>
-            </details>
+            <p class="fl-source"><strong>Source:</strong> Enayetullah et al 2005, Waste Concern 2015 &amp; Field Survey, Waste Concern Consultant 2020 •<br><strong>Chart:</strong> Zyma Islam &amp; Abdullah Hel Bubun</p>
           </figure>
 
           <div class="prose">
-            <p>Polythene shopping bags are a daily part of that accumulation. According to the 2022 ESDO study, close to 1.4 million bags are discarded after a single use in Dhaka each day. An average family in the city uses five a day.</p>
+            <p>Polythene shopping bags are a daily part of that accumulation. According to the 2022 ESDO study, close to 1.4 million bags are discarded after a single use in Dhaka each day. On average, a family in Dhaka uses <strong class="hl">five polythene bags a day</strong>.</p>
           </div>
 
       <section class="bag-band" id="bag-count" aria-labelledby="bag-count-title">
@@ -187,12 +187,12 @@
 
           <figure class="voice">
             <blockquote><p>The BNP government banned poly bags in 2002. But successive governments did not take action to regulate poly bags. Now we are collecting information as part of preparation to conduct mobile courts against illegal factories.</p></blockquote>
-            <figcaption><strong>Shaikh Faridul Islam</strong><span>State minister, Ministry of Environment, Forest and Climate Change</span></figcaption>
+            <figcaption><strong>Shaikh Faridul Islam</strong><span>State Minister, Ministry of Environment, Forest and Climate Change</span></figcaption>
           </figure>
 
           <div class="prose">
             <h3>The people recovering what they can</h3>
-            <p>Only 37 percent of Dhaka’s plastic waste was recycled, according to World Bank figures for 2020. Almost all of that work was carried out by the informal sector, clustered in places such as Islambagh in Old Dhaka.</p>
+            <p>The 2020 World Bank report found that only 37 percent of the plastic waste in Dhaka gets recycled, almost entirely by the informal sector clustered in places like Islambagh in Old Dhaka.</p>
           </div>
 
           <figure class="report-chart report-chart--recycling reveal" id="chart-recycling" aria-labelledby="recycling-title" aria-describedby="recycling-description">
@@ -202,7 +202,7 @@
             </figcaption>
             <div class="recycling-layout">
               <div class="waffle-wrap">
-                <div class="recycling-waffle" role="img" aria-label="100 equal squares represent all plastic waste in Dhaka in 2020. 37 solid dark squares are recycled; 63 hatched orange squares are not recycled.">
+                <div class="recycling-waffle" role="img" aria-label="100 equal squares represent all plastic waste in Dhaka in 2020. 37 brick-orange squares are recycled; 63 black squares are not recycled.">
           <span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span>
           <span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span>
           <span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span><span class="waffle-cell waffle-cell--recycled"></span>
@@ -231,7 +231,7 @@
 
           <div class="prose">
             <p>On a recent visit to Islambagh, The Daily Star spoke to Shamsul Alam, a trader who runs a plastic scrap shop supplying recycling factories.</p>
-            <p>Plastic waste from different parts of the city reaches Islambagh, he said. Workers sort it and make plastic chips, which are sold to factories to be turned into plastic products.</p>
+            <p>Plastic waste from different parts of the city reaches Islambagh, he said. After sorting and making plastic chips, they sell them to factories that use the chips to make plastic products.</p>
           </div>
         </section>
 
@@ -249,62 +249,32 @@
           </header>
 
           <div class="prose">
-            <p>Bangladesh has 1,415 rivers, covering nearly 24,140 kilometres, according to Bangladesh Water Development Board figures cited in the report. Many, particularly those around Dhaka, are becoming increasingly polluted by indiscriminate dumping of plastic waste, experts say.</p>
-            <p>The consequences play out every monsoon. About half an hour of moderate to heavy rain can submerge roads across the capital. Between 2020 and 2024, Dhaka’s two city corporations spent more than <strong>Tk 1,000 crore</strong> trying to unclog and rehabilitate the drainage network.</p>
+            <p>Bangladesh has 1,415 rivers, covering nearly 24,140 kilometres, according to Bangladesh Water Development Board figures. Many, particularly those around Dhaka, are becoming increasingly polluted by indiscriminate dumping of plastic waste, experts say.</p>
+            <p>The consequence of this plays out every monsoon: about half an hour of moderate to heavy rain submerges roads all over the capital. Between 2020 and 2024, Dhaka’s two city corporations spent more than <strong>Tk 1,000 crore</strong> trying to unclog and rehabilitate the drainage network.</p>
             <p>Officials say that within days of a cleaning drive, the same drains choke again, mostly with polythene, food wrappers and packaging.</p>
             <p>Researchers have also found increasing plastic contamination in the Sundarbans, a UNESCO World Heritage site, alongside growing tourism. Nearly 250,000 tourists visit the mangrove forest annually.</p>
           </div>
 
-          <aside class="finding reveal" aria-label="Microplastics measured in Sundarbans water">
-            <div class="finding-value"><strong>23.25</strong><span>microplastic particles per litre of water</span></div>
-            <div class="finding-context">
-              <h3>Even the Sundarbans is affected</h3>
-              <p>A study of three ecologically critical wetland systems measured this concentration in Sundarbans waters, higher than at Kaptai Lake or Tanguar Haor. PET was the dominant plastic contaminant.</p>
-              <p class="chart-source">Source: <a href="https://doi.org/10.1016/j.hazadv.2025.100929" target="_blank" rel="noopener noreferrer">Journal of Hazardous Materials Advances</a>. Water measurements use particles per litre.</p>
+          <figure class="fl-chart fl-chart--sundarbans reveal" id="chart-sundarbans" aria-labelledby="sundarbans-title" aria-describedby="sundarbans-description">
+            <div class="fl-bg" aria-hidden="true"></div>
+            <figcaption class="fl-heading">
+              <h3 class="fl-title" id="sundarbans-title">High levels of microplastic in Sundarbans waters</h3>
+              <p class="fl-deck" id="sundarbans-description">Plastic particles per litre in three tourist spots. PET was the main contaminant.</p>
+            </figcaption>
+            <p class="pg-key" aria-hidden="true"><span class="pg-i"></span>= 1</p>
+            <div class="pg-plot" data-tip-style="dark" role="img" aria-label="Microplastic particles per litre of water, one bottle for each particle: Sundarbans 23.25, Kaptai Lake 12, Tanguar Haor 9.42.">
+              <div class="pg-col pg-col--sundarbans" data-tip-title="Sundarbans" data-tip="Microplastic particles per litre: 23.25"><p class="pg-val">23.25</p><div class="pg-icons"><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i pg-i--part" style="--fill:25%"></span></div></div>
+              <div class="pg-col pg-col--kaptai" data-tip-title="Kaptai Lake" data-tip="Microplastic particles per litre: 12"><p class="pg-val">12</p><div class="pg-icons"><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span></div></div>
+              <div class="pg-col pg-col--tanguar" data-tip-title="Tanguar Haor" data-tip="Microplastic particles per litre: 9.42"><p class="pg-val">9.42</p><div class="pg-icons"><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i"></span><span class="pg-i pg-i--part" style="--fill:42%"></span></div></div>
             </div>
-          </aside>
+            <div class="pg-axis" aria-hidden="true"><span>Sundarbans</span><span>Kaptai Lake</span><span>Tanguar Haor</span></div>
+            <p class="fl-source fl-source--rule"><strong>Source:</strong> <a href="https://doi.org/10.1016/j.hazadv.2025.100929" target="_blank" rel="noopener noreferrer">A 2026 study published in the Journal of Hazardous Materials Advances</a> • A study of three ecologically critical wetland systems: Sundarbans, Kaptai Lake and Tanguar Haor.</p>
+          </figure>
 
           <div class="prose">
-            <p>A 2023 study of the Buriganga found microplastics, particles smaller than 5 millimetres, in fish, crabs and river sediment. It also detected high loads of toxic heavy metals, including chromium, lead, arsenic and cadmium.</p>
+            <p><a href="https://doi.org/10.1016/j.scitotenv.2022.159344" target="_blank" rel="noopener noreferrer">A 2023 study</a> on the Buriganga River also found alarming levels of microplastic (size below 5 mm) in the food that we eat.</p>
+            <p>It found microplastic concentrations ranging from 0.65 to 3.82 particles per gram in fish, 3.75 to 4.28 particles per gram in crabs, and up to 8.17 particles per gram in river sediment. It also found high loads of toxic heavy metals including chromium, lead, arsenic and cadmium.</p>
           </div>
-
-          <figure class="report-chart report-chart--microplastics reveal" id="chart-microplastics" aria-labelledby="microplastics-title" aria-describedby="microplastics-description">
-            <figcaption class="chart-heading">
-              <h3 id="microplastics-title">Plastic too small to see.</h3>
-              <p class="chart-deck" id="microplastics-description">Buriganga, 2023. Microplastics measured in fish, crabs and river sediment, as reported concentrations in particles per gram.</p>
-            </figcaption>
-            <div class="concentration-chart" role="img" aria-label="Buriganga study in 2023: fish contained 0.65 to 3.82 microplastic particles per gram; crabs contained 3.75 to 4.28; river sediment contained up to 8.17. Fish and crab marks show reported ranges. Sediment has one maximum marker because no minimum was reported. All use a zero to nine particles per gram scale.">
-              <div class="concentration-unit-row" aria-hidden="true"><span></span><p class="chart-unit">Microplastic particles per gram</p></div>
-              <div class="concentration-row" aria-hidden="true">
-                <div class="concentration-label"><strong>Fish</strong><span>0.65-3.82</span></div>
-                <div class="concentration-track concentration-track--fish">
-                  <span class="concentration-range" style="--range-start:7.222222%;--range-end:42.444444%"></span>
-                  <span class="concentration-point concentration-point--circle" style="--point:7.222222%"></span><span class="concentration-point concentration-point--circle" style="--point:42.444444%"></span>
-                </div>
-              </div>
-              <div class="concentration-row" aria-hidden="true">
-                <div class="concentration-label"><strong>Crabs</strong><span>3.75-4.28</span></div>
-                <div class="concentration-track concentration-track--crabs">
-                  <span class="concentration-range" style="--range-start:41.666667%;--range-end:47.555556%"></span>
-                  <span class="concentration-point concentration-point--diamond" style="--point:41.666667%"></span><span class="concentration-point concentration-point--diamond" style="--point:47.555556%"></span>
-                </div>
-              </div>
-              <div class="concentration-row" aria-hidden="true">
-                <div class="concentration-label"><strong>River sediment</strong><span><small>up to</small> 8.17</span></div>
-                <div class="concentration-track concentration-track--sediment">
-                  <span class="concentration-point concentration-point--maximum" style="--point:90.777778%"></span>
-                </div>
-              </div>
-              <div class="concentration-axis-row" aria-hidden="true"><span></span><div class="concentration-axis">
-                <span style="--tick:0%">0</span><span style="--tick:11.111111%">1</span><span style="--tick:22.222222%">2</span><span style="--tick:33.333333%">3</span><span style="--tick:44.444444%">4</span><span style="--tick:55.555556%">5</span><span style="--tick:66.666667%">6</span><span style="--tick:77.777778%">7</span><span style="--tick:88.888889%">8</span><span style="--tick:100%">9</span>
-              </div></div>
-            </div>
-            <div class="concentration-notes">
-              <p><span class="range-key" aria-hidden="true"></span>Connected marks show the reported range.</p>
-              <p><span class="maximum-key" aria-hidden="true"></span>The sediment mark shows a maximum only.</p>
-            </div>
-            <p class="chart-source">Source: <a href="https://doi.org/10.1016/j.scitotenv.2022.159344" target="_blank" rel="noopener noreferrer">Buriganga study, Science of the Total Environment, January 2023</a>.</p>
-          </figure>
 
           <figure class="pull">
             <blockquote><p>Plastic is an emerging pollutant and <em>no safe limit for plastic has been fixed yet.</em></p></blockquote>
@@ -333,20 +303,66 @@
 
           <div class="prose">
             <p>Other environmental activists say that, despite having good laws, successive governments have failed to implement them.</p>
-            <p>Bangladesh’s National Action Plan for Sustainable Plastic Management, aligned with the 8th Five-Year Plan, set three major targets.</p>
+            <p>Bangladesh’s National Action Plan for Sustainable Plastic Management, aligned with the 8th Five-Year Plan, set three major targets. These include recycling 50 percent of plastic by 2025, phasing out 90 percent of targeted single-use plastics by 2026, and cutting overall plastic generation by 30 percent by 2030 against a 2020-21 baseline.</p>
           </div>
 
-          <figure class="policy-targets reveal" aria-labelledby="targets-title">
+          <figure class="policy-targets reveal" aria-labelledby="targets-title" aria-describedby="targets-description">
             <figcaption class="chart-heading">
               <h3 id="targets-title">The promises on paper</h3>
-              <p class="chart-deck">Three targets in the National Action Plan. Each measures a different part of the plastic problem.</p>
+              <p class="chart-deck" id="targets-description">Three targets in the National Action Plan, each set against the latest available figure.</p>
             </figcaption>
-            <ol class="target-line">
-              <li class="target"><p class="target-year">By 2025</p><p class="target-value">50%</p><div class="target-text"><h4>of plastic recycled</h4><p>Raise recycling to half of the country’s plastic.</p></div></li>
-              <li class="target"><p class="target-year">By 2026</p><p class="target-value">90%</p><div class="target-text"><h4>of targeted single-use plastics phased out</h4><p>Phase out the specified single-use products.</p></div></li>
-              <li class="target"><p class="target-year">By 2030</p><p class="target-value">30%</p><div class="target-text"><h4>less plastic waste generated</h4><p>Reduce annual generation against the 2020-21 baseline.</p></div></li>
+            <ol class="pledges">
+              <li class="pledge pledge--behind">
+                <div class="pledge-claim">
+                  <h4>Recycle 50% of plastic by 2025</h4>
+                  <p class="pledge-status">Behind at last count</p>
+                </div>
+                <div class="pledge-reading">
+                  <div class="pledge-meter" role="img" aria-label="37 percent of Dhaka’s plastic waste was recycled in 2020, against a national target of 50 percent by 2025.">
+                    <span class="pledge-fill" style="--to:37%"></span>
+                    <span class="pledge-mark" style="--at:50%"><span>Target 50%</span></span>
+                  </div>
+                  <div class="pledge-facts">
+                    <p class="pledge-value"><strong>37%</strong> recycled in Dhaka</p>
+                    <p class="pledge-source">World Bank, 2020 <span class="pledge-flag">Dhaka only</span></p>
+                  </div>
+                </div>
+              </li>
+              <li class="pledge pledge--paper">
+                <div class="pledge-claim">
+                  <h4>Phase out 90% of targeted single-use plastics by 2026</h4>
+                  <p class="pledge-status">Banned on paper</p>
+                </div>
+                <div class="pledge-reading">
+                  <div class="pledge-meter" role="img" aria-label="9 of the 17 listed single-use items, or 53 percent, have been banned, against a target of 90 percent phased out by 2026. Enforcement is not verified.">
+                    <span class="pledge-fill" style="--to:52.941%"></span>
+                    <span class="pledge-mark pledge-mark--end" style="--at:90%"><span>Target 90%</span></span>
+                  </div>
+                  <div class="pledge-facts">
+                    <p class="pledge-value"><strong>9 of 17</strong> listed items banned</p>
+                    <p class="pledge-source">ESDO <span class="pledge-flag">Enforcement unverified</span></p>
+                  </div>
+                </div>
+              </li>
+              <li class="pledge pledge--wrong">
+                <div class="pledge-claim">
+                  <h4>Cut plastic waste 30% by 2030, against 2020–21</h4>
+                  <p class="pledge-status">Going the other way</p>
+                </div>
+                <div class="pledge-reading">
+                  <div class="pledge-meter pledge-meter--diverging" role="img" aria-label="The target is a 30 percent cut in plastic waste from the 2020–21 level by 2030. The plastic industry is instead estimated to be growing by 20 percent a year, a measure of the industry, not of waste.">
+                    <span class="pledge-zero"><span>2020–21 level</span></span>
+                    <span class="pledge-fill pledge-fill--arrow" style="--from:50%;--to:75%"></span>
+                    <span class="pledge-mark pledge-mark--start" style="--at:12.5%"><span>Target −30%</span></span>
+                  </div>
+                  <div class="pledge-facts">
+                    <p class="pledge-value"><strong>+20%</strong> estimated industry growth a year</p>
+                    <p class="pledge-source">Invest Bangladesh <span class="pledge-flag">Measures industry, not waste</span></p>
+                  </div>
+                </div>
+              </li>
             </ol>
-            <p class="chart-source"><strong>Targets, not measured outcomes.</strong> Source: <a href="https://www.worldbank.org/en/news/press-release/2021/12/20/sustainable-plastic-management-is-key-to-achieve-green-growth-for-bangladesh" target="_blank" rel="noopener noreferrer">National Action Plan, via the World Bank, 2021</a>.</p>
+            <p class="chart-source"><strong>Targets:</strong> <a href="https://www.worldbank.org/en/news/press-release/2021/12/20/sustainable-plastic-management-is-key-to-achieve-green-growth-for-bangladesh" target="_blank" rel="noopener noreferrer">National Action Plan, via the World Bank, 2021</a>. <strong>Latest figures:</strong> <a href="https://blogs.worldbank.org/en/endpovertyinsouthasia/tackling-plastic-pollution-green-growth-bangladesh" target="_blank" rel="noopener noreferrer">World Bank, June 2021</a>; Shahriar Hossain, ESDO; Invest Bangladesh. None of the figures measures its target exactly; the flags say how each falls short.</p>
           </figure>
 
           <div class="prose">
@@ -354,7 +370,7 @@
           </div>
           <figure class="voice">
             <blockquote><p>The government will soon impose ban on using single use plastic in university campus and tourism sites.</p></blockquote>
-            <figcaption><strong>Shaikh Faridul Islam</strong><span>State minister, Ministry of Environment, Forest and Climate Change</span></figcaption>
+            <figcaption><strong>Shaikh Faridul Islam</strong><span>State Minister, Ministry of Environment, Forest and Climate Change</span></figcaption>
           </figure>
 
           <section class="cleanup" aria-labelledby="cleanup-title">
@@ -391,6 +407,7 @@
         <div class="report-notes__content">
         <ul>
           <li><a href="https://blogs.worldbank.org/en/endpovertyinsouthasia/tackling-plastic-pollution-green-growth-bangladesh" target="_blank" rel="noopener noreferrer">World Bank, 2021</a>: Dhaka’s daily plastic waste in 2005 and 2020, and its recycling share.</li>
+          <li>Enayetullah et al 2005, Waste Concern 2015 &amp; Field Survey, Waste Concern Consultant 2020: plastic used per person in Dhaka and in urban Bangladesh.</li>
           <li>ESDO study, 2022.</li>
           <li><a href="https://doi.org/10.1016/j.scitotenv.2022.159344" target="_blank" rel="noopener noreferrer">Science of the Total Environment, 2023</a>: microplastics in Buriganga fish, crabs and sediment.</li>
           <li><a href="https://doi.org/10.1016/j.hazadv.2025.100929" target="_blank" rel="noopener noreferrer">Journal of Hazardous Materials Advances</a>: microplastics in three wetland systems, including the Sundarbans.</li>

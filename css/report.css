@@ -2,8 +2,8 @@
  * The report after the opening.  Editorial, restrained, light.
  *
  *   type     one family (Newsreader), upright only: hierarchy comes from size, weight and
- *            optical size, never from italics or coloured text
- *   colour   neutral off-white and off-black; one signal accent, used only for data marks
+ *            optical size, never from italics.  A handful of key figures are set in bold maroon
+ *   colour   neutral off-white and off-black; warm accents, used for data marks and those figures
  *   frames   reading happens in one centred measure; figures step out to a wider frame
  *   shape    square everywhere; pills only for the floating counter and round share buttons
  */
@@ -16,6 +16,8 @@
   --ink-3: #62666c;
   --rule: #d9d9d3;
   --accent: #d8431d;
+  --maroon: #800000;
+  --brick: #bf542a;
   --night: #0f1216;
   --night-ink: #f0efea;
   --night-mute: #a3a5a8;
@@ -37,7 +39,7 @@
 
 /* -------------------------------------------------------------------- frames */
 .prose, .chapter-head, .voice, .report-notes { width: min(calc(100% - 2 * var(--gutter)), var(--measure)); margin-inline: auto; }
-.report-chart, .finding, .policy-targets, .pull { width: min(calc(100% - 2 * var(--gutter)), var(--wide)); margin-inline: auto; }
+.report-chart, .fl-chart, .policy-targets, .pull { width: min(calc(100% - 2 * var(--gutter)), var(--wide)); margin-inline: auto; }
 
 /* -------------------------------------------------------------------- shared */
 .kicker {
@@ -79,6 +81,11 @@
 }
 .prose p:last-child { margin-bottom: 0; }
 .prose strong { font-weight: 650; }
+/* The figures the reader should carry away: bold maroon, lifted by a soft shadow. */
+.story .hl {
+  font-weight: 700; color: var(--maroon);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 6px rgba(128, 0, 0, 0.28);
+}
 .prose h3 {
   margin: var(--space-block) 0 0.7em;
   font-size: clamp(1.55rem, 1.3rem + 1vw, 2.125rem); line-height: 1.12; font-weight: 550;
@@ -151,34 +158,50 @@
   font-size: 0.875rem; line-height: 1.5; color: var(--ink-3);
 }
 
-/* -------------------------------------------------------------------- a single finding */
-.finding {
-  display: grid; gap: 24px; margin-block: var(--space-block);
-  padding-top: clamp(20px, 2.4vw, 28px); border-top: 1px solid var(--ink);
-}
-.finding-value strong {
-  display: block; font-size: clamp(4.5rem, 2.4rem + 8vw, 9rem); line-height: 0.85; font-weight: 300;
-  letter-spacing: -0.05em;
-}
-.finding-value span { display: block; max-width: 18ch; margin-top: 14px; font-size: 1.0625rem; line-height: 1.35; color: var(--ink-2); }
-.finding-context h3 { margin: 0 0 12px; font-size: clamp(1.5rem, 1.25rem + 0.9vw, 2rem); line-height: 1.12; font-weight: 550; letter-spacing: -0.02em; }
-.finding-context p { margin: 0; font-size: 1.0625rem; line-height: 1.55; color: var(--ink-2); max-width: 44ch; }
-.finding-context .chart-source { margin-top: 16px; }
-
-/* -------------------------------------------------------------------- policy targets: a timeline */
+/* -------------------------------------------------------------------- policy targets: each promise against the latest figure
+   One row per target.  The dashed mark is the promise, the solid bar the latest measured figure,
+   and a flag says how far that figure falls short of measuring the promise itself. */
 .policy-targets { margin-block: var(--space-block); padding-top: clamp(20px, 2.4vw, 28px); border-top: 1px solid var(--ink); }
-.target-line { position: relative; list-style: none; margin: 0; padding: 0; }
-.target-line::before { content: ''; position: absolute; left: 6px; top: 12px; bottom: 12px; width: 1px; background: var(--ink); }
-.target { position: relative; display: grid; grid-template-columns: auto 1fr; column-gap: 20px; align-items: baseline; padding: 0 0 clamp(28px, 4vw, 44px) 36px; }
-.target:last-child { padding-bottom: 0; }
-.target::before {
-  content: ''; position: absolute; left: 0; top: 0.35em; width: 13px; height: 13px; border-radius: 50%;
-  background: var(--paper); box-shadow: inset 0 0 0 2px var(--ink);
+.pledges { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--pledge-rule); }
+.pledge { display: grid; gap: 18px 48px; padding: clamp(22px, 2.8vw, 32px) 0; border-bottom: 1px solid var(--pledge-rule); }
+.pledge--behind { --pledge-c: #a23f24; }
+.pledge--paper { --pledge-c: #2f5d50; }
+.pledge--wrong { --pledge-c: #800000; }
+.pledge-claim h4 {
+  max-width: 24ch; margin: 0; font-size: clamp(1.2rem, 1.06rem + 0.55vw, 1.5rem); line-height: 1.25; font-weight: 550;
+  letter-spacing: -0.012em; text-wrap: balance;
 }
-.target-year { grid-column: 1 / -1; margin: 0 0 8px; font-size: 1.0625rem; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
-.target-value { margin: 0; font-size: clamp(3.25rem, 2.3rem + 3.4vw, 5.5rem); line-height: 0.86; font-weight: 300; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
-.target-text h4 { margin: 0; font-size: 1.1875rem; line-height: 1.3; font-weight: 600; }
-.target-text p { margin: 6px 0 0; font-size: 1rem; line-height: 1.5; color: var(--ink-2); max-width: 40ch; }
+.pledge-status {
+  display: inline-block; margin: 12px 0 0; padding: 5px 11px 6px; border: 1.5px solid var(--pledge-c);
+  background: rgba(255, 252, 246, 0.6); color: var(--pledge-c);
+  font-size: 0.875rem; line-height: 1.2; font-weight: 700; letter-spacing: 0.01em;
+}
+.pledge-meter { position: relative; height: clamp(28px, 3vw, 34px); margin-top: 30px; background: #fbf8f2; box-shadow: inset 0 0 0 1px #cdbda3; }
+.pledge-fill {
+  position: absolute; top: 0; bottom: 0; left: var(--from, 0%); width: calc(var(--to) - var(--from, 0%));
+  background-color: var(--pledge-c); transform-origin: 0 50%; transition: transform 0.9s var(--ease-out) 0.1s;
+}
+/* Banned, but not shown to be enforced: the bar is hatched. */
+.pledge--paper .pledge-fill { background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(251, 248, 242, 0.34) 6px 9px); }
+/* Moving away from the target: the bar is an arrow. */
+.pledge-fill--arrow { clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); }
+.js .policy-targets:not(.is-in) .pledge-fill { transform: scaleX(0); }
+.pledge-mark, .pledge-zero { position: absolute; top: -9px; bottom: -6px; left: var(--at); }
+.pledge-mark { width: 0; border-left: 2px dashed var(--ink); }
+.pledge-zero { left: 50%; width: 2px; margin-left: -1px; background: var(--ink); }
+.pledge-mark > span, .pledge-zero > span {
+  position: absolute; bottom: 100%; left: 0; padding-bottom: 5px; transform: translateX(-50%);
+  white-space: nowrap; font-size: 0.8125rem; line-height: 1.2; font-weight: 700; color: var(--ink);
+}
+.pledge-mark--end > span { transform: translateX(-100%); left: 2px; }
+.pledge-mark--start > span { transform: none; left: -2px; }
+.pledge-zero > span { transform: none; left: 7px; font-weight: 500; color: var(--ink-3); }
+.pledge-facts { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 20px; margin-top: 14px; }
+.pledge-value { margin: 0; font-size: 1rem; line-height: 1.35; color: var(--ink-2); }
+.pledge-value strong { margin-right: 3px; font-size: 1.5rem; line-height: 1; font-weight: 700; letter-spacing: -0.015em; color: var(--pledge-c); font-variant-numeric: tabular-nums; }
+.pledge-source { margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--ink-3); }
+.pledge-flag { display: inline-block; margin-left: 6px; padding: 1px 7px 2px; background: #f0d8ca; color: #6b2d1a; font-size: 0.8125rem; font-weight: 600; }
+.policy-targets .chart-source { margin-top: 22px; }
 
 /* -------------------------------------------------------------------- the live polythene count */
 .bag-band { margin-top: var(--space-block); padding: clamp(72px, 10vw, 136px) 0 clamp(56px, 7vw, 96px); background: var(--tint); }
@@ -264,18 +287,13 @@ html:not(.js) .bag-band__num.no-js { display: block; }
 @media (min-width: 720px) {
   .bag-band__facts { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-rows: auto auto; column-gap: clamp(32px, 6vw, 96px); row-gap: 28px; }
   .fact--main { grid-row: 1 / span 2; }
-  .target { grid-template-columns: 7.5rem 11rem 1fr; padding-left: 44px; }
-  .target-year { grid-column: auto; margin: 0; }
-  .target::before { top: 0.2em; }
-  .target-line::before { top: 10px; }
+  .pledge { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr); align-items: start; }
+  .pledge-meter { margin-top: 26px; }
   .bag-dock { top: 20px; right: 20px; gap: 10px; min-height: 48px; padding: 8px 18px 8px 14px; }
   .bag-dock__num { font-size: 1.25rem; }
   .bag-dock__unit { display: none; }
   .bag-dock__label { display: block; font-size: 0.75rem; line-height: 1.25; white-space: nowrap; color: #b4b5b8; }
   .footer-identity img { width: 172px; }
-}
-@media (min-width: 900px) {
-  .finding { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: clamp(40px, 6vw, 96px); align-items: end; }
 }
 @media (max-width: 520px) {
   .story-meta p { padding: 0 12px; font-size: 0.875rem; }
@@ -286,6 +304,8 @@ html:not(.js) .bag-band__num.no-js { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   .js .reveal { opacity: 1; transform: none; transition: none; }
+  .pledge-fill { transition: none; }
+  .js .policy-targets:not(.is-in) .pledge-fill { transform: none; }
   .bag-dock { transition: opacity 0.2s linear; transform: none; }
   .ending__num { transition: opacity 0.2s linear; }
   .js .ending.is-waiting .ending__num { transform: none; }
@@ -297,7 +317,7 @@ html:not(.js) .bag-band__num.no-js { display: block; }
   .bag-band, .ending { background: none; color: #000; }
   .ending__num { color: #000; }
   .voice { box-shadow: none; border: 1px solid #999; }
-  figure, .finding { break-inside: avoid; }
+  figure { break-inside: avoid; }
   .js .reveal { opacity: 1; transform: none; }
 }
 /* Section variations: paper, river green and warm copper. */
@@ -310,13 +330,7 @@ html:not(.js) .bag-band__num.no-js { display: block; }
 .bag-band__facts { margin-top: 32px; border-color: #bfb29b; }
 .bag-band__note { color: #5d4b3b; }
 .bag-band__source { color: #53564f; }
-.finding { padding: clamp(26px, 4vw, 52px); border: 0; background: #173d35; color: #f3f0df; align-items: center; }
-.finding-value strong { color: #d5dda1; font-weight: 600; font-size: clamp(4rem, 2.4rem + 6vw, 7.5rem); }
-.finding-value span, .finding-context p, .finding-context .chart-source { color: #d7e2d8; }
-.finding-context h3 { font-weight: 600; }
-.policy-targets { background: #eee4d4; padding: clamp(24px, 4vw, 48px); border: 0; --ink: #453326; --ink-2: #65513d; --ink-3: #715e49; --paper: #eee4d4; }
-.target-value { color: #974425; font-weight: 700; }
-.target-line::before { background: #c3b298; }
+.policy-targets { background: #eee4d4; padding: clamp(24px, 4vw, 48px); border: 0; --ink: #453326; --ink-2: #5f4b38; --ink-3: #6a5743; --paper: #eee4d4; --pledge-rule: #d6c6ab; }
 .ending { background: #142d2b; padding-block: clamp(52px, 6vw, 88px); }
 .ending__title { color: #d0dad3; }
 .ending__num { color: #efb17f; font-weight: 700; font-size: clamp(3.6rem, 1.6rem + 10vw, 10rem); overflow-wrap: anywhere; }
@@ -362,13 +376,9 @@ html:not(.js) .bag-band__num.no-js { display: block; }
   .fact--main { grid-row: auto; grid-column: 1 / -1; }
   .bag-band__source { grid-column: 1 / -1; }
 }
-@media (min-width: 720px) and (max-width: 1000px) {
-  .policy-targets .target { grid-template-columns: 6rem 8rem minmax(0, 1fr); column-gap: 16px; }
-}
 @media (max-width: 520px) {
-  .target { grid-template-columns: 1fr; padding-left: 26px; }
-  .target-value { margin-block: 4px 12px; }
-  .target-text { grid-column: 1; }
+  .policy-targets { padding-inline: 18px; }
+  .pledge-facts { flex-direction: column; gap: 4px; }
   .report-footer { gap: 24px; }
   .social-links { margin-left: -10px; }
 }

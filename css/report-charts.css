@@ -1,8 +1,7 @@
 /* Report figures.  Titles state the finding; every value is printed on the face.  Marks are
-   ink, grey and the page's single accent, always doubled by a label, a pattern or a shape,
-   so each chart reads in greyscale.  No text is coloured. */
+   ink, grey and a few warm accents, always doubled by a label, a pattern or a shape, so each
+   chart reads in greyscale.  Text takes colour only where it names a series. */
 .report-chart {
-  --chart-then: #a3a5a7;
   --chart-line: rgba(18, 21, 24, 0.14);
   margin-block: var(--space-block);
   padding-top: clamp(20px, 2.4vw, 28px);
@@ -15,23 +14,8 @@
   letter-spacing: -0.03em; text-wrap: balance;
 }
 .chart-deck { max-width: 40rem; margin: 14px 0 0; font-size: 1.0625rem; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-.chart-unit { margin: 0; font-size: 0.875rem; line-height: 1.4; color: var(--ink-3); }
 .chart-source { max-width: 62rem; margin: 26px 0 0; font-size: 0.8125rem; line-height: 1.55; color: var(--ink-3); }
 .chart-source strong { font-weight: 600; color: var(--ink-2); }
-.chart-data { margin-top: 6px; font-size: 0.875rem; color: var(--ink-3); }
-.chart-data summary {
-  display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font-weight: 600; color: var(--ink-2);
-  list-style: none;
-}
-.chart-data summary::-webkit-details-marker { display: none; }
-.chart-data summary::before { content: '+'; display: inline-block; width: 1.1em; font-weight: 400; }
-.chart-data[open] summary::before { content: '−'; }
-.chart-data summary:hover { color: var(--ink); }
-.chart-data table { width: 100%; margin: 6px 0 12px; border-collapse: collapse; font-size: 0.9375rem; text-align: left; color: var(--ink); font-variant-numeric: tabular-nums; }
-.chart-data caption { margin-bottom: 8px; text-align: left; font-weight: 600; }
-.chart-data th, .chart-data td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--chart-line); vertical-align: top; }
-.chart-data thead th { font-weight: 600; color: var(--ink-2); }
-.chart-data tbody th { font-weight: 500; }
 
 /* ---------------------------------------------------------------- time to break down */
 .time-scale { padding-top: 4px; }
@@ -45,8 +29,8 @@
 .time-bar span { font-size: clamp(0.875rem, 0.8rem + 0.25vw, 1rem); line-height: 1.3; max-width: 24ch; }
 .time-bar--past { background: var(--tint); color: var(--ink); border-left: 2px solid var(--ink); }
 .time-bar--pet {
-  background-color: var(--accent); color: #fffaf5;
-  background-image: repeating-linear-gradient(135deg, transparent 0 7px, rgba(255, 248, 238, 0.16) 7px 8px);
+  background-color: #964a4a; color: #fffaf5;
+  background-image: repeating-linear-gradient(135deg, transparent 0 7px, rgba(255, 248, 238, 0.14) 7px 8px);
 }
 .time-axis { position: relative; height: 34px; border-top: 1px solid var(--ink); }
 .time-axis span { position: absolute; top: 9px; left: var(--tick); transform: translateX(-50%); font-size: 0.875rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
@@ -55,48 +39,17 @@
 .time-axis .is-now { font-weight: 600; color: var(--ink); }
 .time-axis .is-now::before { content: ''; position: absolute; left: 50%; top: -15px; width: 1px; height: 11px; background: var(--ink); }
 
-/* ---------------------------------------------------------------- waste volume */
-.growth-layout { display: grid; gap: clamp(28px, 4vw, 48px); }
-.growth-finding { display: flex; align-items: baseline; gap: 18px; margin: 0; }
-.growth-finding > strong {
-  font-size: clamp(4.5rem, 2.6rem + 7vw, 8.5rem); line-height: 0.82; font-weight: 700;
-  letter-spacing: -0.06em; white-space: nowrap;
-}
-.growth-finding strong span { font-size: 0.6em; letter-spacing: 0; }
-.growth-finding > span { max-width: 13ch; font-size: 1.0625rem; line-height: 1.35; color: var(--ink-2); }
-.growth-comparison { min-width: 0; }
-.growth-comparison > .chart-unit { margin-bottom: 18px; }
-.growth-row + .growth-row { margin-top: 22px; }
-.growth-row-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.growth-row-label span { font-size: 1rem; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.growth-row-label strong { font-size: clamp(1.6rem, 1.3rem + 1vw, 2.25rem); line-height: 1; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-.growth-track { height: clamp(36px, 4vw, 48px); border-left: 1px solid var(--ink); }
-.growth-bar { width: var(--bar-size); height: 100%; transform-origin: 0 50%; transition: transform 0.8s var(--ease-out); }
-.growth-row + .growth-row .growth-bar { transition-delay: 0.12s; }
-.growth-bar--then { background: var(--chart-then); }
-.growth-bar--now { background: var(--accent); }
-.js .report-chart--growth:not(.is-in) .growth-bar { transform: scaleX(0); }
-.growth-axis { position: relative; height: 30px; margin-top: 8px; border-top: 1px solid var(--chart-line); }
-.growth-axis span, .concentration-axis span {
-  position: absolute; top: 8px; left: var(--tick); transform: translateX(-50%);
-  font-size: 0.8125rem; line-height: 1; color: var(--ink-3); font-variant-numeric: tabular-nums;
-}
-.growth-axis span:first-child, .concentration-axis span:first-child { transform: none; }
-
 /* ---------------------------------------------------------------- recovery: one hundred squares */
 .recycling-layout { display: grid; gap: clamp(32px, 5vw, 72px); align-items: center; }
 .waffle-wrap { width: 100%; max-width: 440px; }
 .recycling-waffle { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: clamp(3px, 0.5vw, 5px); }
 .waffle-cell { aspect-ratio: 1; transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out); }
-.waffle-cell--recycled, .chart-swatch--recycled { background: var(--ink); }
-.waffle-cell--unrecycled, .chart-swatch--unrecycled {
-  background-color: var(--accent);
-  background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgba(255, 248, 238, 0.3) 4px 5px);
-}
+.waffle-cell--recycled, .chart-swatch--recycled { background: var(--brick); }
+.waffle-cell--unrecycled, .chart-swatch--unrecycled { background: var(--ink); }
 .js .report-chart--recycling:not(.is-in) .waffle-cell { opacity: 0; transform: scale(0.6); }
 .waffle-unit { margin: 14px 0 0; font-size: 0.875rem; color: var(--ink-3); }
 .recycling-finding { display: flex; align-items: baseline; gap: 14px; margin: 0; }
-.recycling-finding strong { font-size: clamp(4.5rem, 2.6rem + 7vw, 8.5rem); line-height: 0.82; font-weight: 300; letter-spacing: -0.06em; }
+.recycling-finding strong { font-size: clamp(4.5rem, 2.6rem + 7vw, 8.5rem); line-height: 0.82; font-weight: 300; letter-spacing: -0.06em; color: var(--brick); }
 .recycling-finding strong span { font-size: 0.5em; letter-spacing: 0; }
 .recycling-finding > span { font-size: 1.375rem; font-weight: 550; }
 .recycling-context { max-width: 22ch; margin: 18px 0 0; font-size: clamp(1.3rem, 1.15rem + 0.5vw, 1.55rem); line-height: 1.3; letter-spacing: -0.01em; }
@@ -106,64 +59,173 @@
 .chart-swatch { flex: none; display: inline-block; width: 16px; height: 16px; }
 .recycling-caution { max-width: 34ch; margin: 18px 0 0; font-size: 0.875rem; line-height: 1.5; color: var(--ink-3); }
 
-/* ---------------------------------------------------------------- concentrations: ranges and a lone maximum */
-.concentration-unit-row, .concentration-row, .concentration-axis-row { display: grid; grid-template-columns: 1fr; }
-.concentration-unit-row > span, .concentration-axis-row > span { display: none; }
-.concentration-unit-row { margin-bottom: 10px; }
-.concentration-label { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 14px 0 6px; }
-.concentration-label strong { font-size: 1rem; font-weight: 600; }
-.concentration-label > span { font-size: clamp(1.5rem, 1.25rem + 0.9vw, 2rem); line-height: 1.1; letter-spacing: -0.02em; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.concentration-label small { font-size: 0.875rem; letter-spacing: 0; color: var(--ink-3); }
-.concentration-track {
-  position: relative; min-height: 56px; border-left: 1px solid var(--ink);
-  background-image: repeating-linear-gradient(to right, transparent 0 calc(11.1111% - 1px), var(--chart-line) calc(11.1111% - 1px) 11.1111%);
+/* ---------------------------------------------------------------- panels first drawn in Flourish
+   Two charts designed in Flourish, rebuilt here so they share the page's type, load nothing from
+   other sites and hold together on a phone.  An illustrated bank lies behind each plot, anchored
+   to the bottom so the marks stand in the water; its empty sky is the panel's own colour, so a
+   tall phone panel simply shows more sky.  Text sits on a light wash wherever it crosses the
+   drawing.  Nothing is clipped: labels scale with the panel's width (cqw), the marks with the
+   screen's height, and notes open in one element fixed to the viewport (see report.js). */
+.fl-chart {
+  --fl-paper: #faf9f4;
+  --fl-ink: #16181b;
+  --fl-ink-2: #2f3337;
+  --halo: 0 0 2px var(--fl-paper), 0 0 5px var(--fl-paper), 0 0 9px var(--fl-paper);
+  position: relative; isolation: isolate; container-type: inline-size;
+  margin-block: var(--space-block);
+  padding: clamp(18px, 2.6vw, 30px) clamp(14px, 2.6vw, 30px) clamp(14px, 2vw, 22px);
+  background: var(--fl-paper); color: var(--fl-ink);
 }
-.concentration-track--fish { --series: var(--ink); }
-.concentration-track--crabs { --series: var(--ink-3); }
-.concentration-track--sediment { --series: var(--accent); }
-.concentration-range {
-  position: absolute; top: 50%; left: var(--range-start); right: calc(100% - var(--range-end)); height: 6px;
-  transform: translateY(-50%); transform-origin: 0 50%; background: var(--series);
-  transition: transform 0.7s var(--ease-out);
+/* The drawing covers the panel's width and at least --fl-min-w, bottom edge to bottom edge. */
+.fl-bg {
+  position: absolute; z-index: -1; inset: 0; pointer-events: none;
+  background: var(--fl-image) var(--fl-x, 50%) 100% / max(100%, var(--fl-min-w)) auto no-repeat;
 }
-.js .report-chart--microplastics:not(.is-in) .concentration-range { transform: translateY(-50%) scaleX(0); }
-.concentration-point { position: absolute; top: 50%; left: var(--point); width: 15px; height: 15px; transform: translate(-50%, -50%); background: var(--series); }
-.concentration-point--circle { border-radius: 50%; }
-.concentration-point--diamond { width: 12px; height: 12px; transform: translate(-50%, -50%) rotate(45deg); }
-.concentration-point--maximum { width: 20px; height: 20px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-.concentration-axis { position: relative; height: 30px; border-top: 1px solid var(--chart-line); }
-.concentration-axis span:last-child { transform: translateX(-100%); }
-.concentration-notes { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 18px; }
-.concentration-notes p { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--ink-3); }
-.range-key { position: relative; flex: none; display: inline-block; width: 26px; height: 3px; background: var(--ink); }
-.range-key::before, .range-key::after { content: ''; position: absolute; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); }
-.range-key::before { left: 0; }
-.range-key::after { right: 0; }
-.maximum-key { flex: none; display: inline-block; width: 14px; height: 14px; background: var(--accent); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.fl-heading { max-width: 62rem; margin: 0 0 clamp(18px, 2.4vw, 28px); }
+.fl-title {
+  margin: 0; font-size: clamp(1.3rem, 1.02rem + 1.15vw, 2rem); line-height: 1.32; font-weight: 700;
+  letter-spacing: -0.012em; text-wrap: pretty;
+}
+.fl-deck { margin: 10px 0 0; font-size: clamp(1.03rem, 0.96rem + 0.42vw, 1.32rem); line-height: 1.42; font-weight: 400; color: var(--fl-ink-2); text-wrap: pretty; }
+.fl-deck strong { font-weight: 700; color: var(--fl-ink); }
+.fl-source {
+  width: fit-content; max-width: 100%; margin: clamp(14px, 2vw, 20px) 0 0; padding: 6px 10px;
+  background: rgba(250, 249, 244, 0.92); box-shadow: 0 0 0 1px rgba(22, 24, 27, 0.06);
+  font-size: 0.875rem; line-height: 1.5; color: #24272a;
+}
+.fl-source strong { font-weight: 700; color: var(--fl-ink); }
+.fl-source a { color: inherit; text-decoration-color: rgba(36, 39, 42, 0.55); }
+
+/* Plastic per person: Bangladesh and Dhaka side by side, years along the top. */
+.fl-chart--percapita { --fl-image: url('../assets/report/percapita-bg.webp'); --fl-x: 22%; --fl-min-w: 853px; }
+.fl-chip {
+  display: inline-block; padding: 0.02em 0.32em 0.08em; border-radius: 4px;
+  line-height: 1.2; font-weight: 700; color: #fff;
+}
+.fl-chip--dhaka { background: #004d21; }
+.fl-chip--bd { background: #8b0000; }
+.pc-plot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* Bars get taller on wider screens and shorter on short ones (a phone held sideways). */
+.pc-year {
+  position: relative; display: grid; cursor: default;
+  grid-template-rows: auto clamp(220px, min(max(18vw + 170px, 300px), 56vh), 420px);
+  grid-template-rows: auto clamp(220px, min(max(18vw + 170px, 300px), 56svh), 420px);
+}
+.pc-year-label {
+  margin: 0; padding: 0 0 9px; border-bottom: 1px solid rgba(22, 24, 27, 0.16);
+  text-align: center; font-size: clamp(0.95rem, 4.2cqw, 1.2rem); line-height: 1.2; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: #000;
+}
+.pc-bars { display: flex; justify-content: center; gap: 6%; padding: 0 7%; }
+.pc-col { position: relative; flex: 0 1 38%; }
+.pc-col--bd { --c: rgba(139, 0, 0, 0.86); }
+.pc-col--dhaka { --c: rgba(0, 77, 33, 0.86); }
+.pc-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--v); background: var(--c);
+  transform-origin: 50% 100%; transition: transform 0.9s var(--ease-out), opacity 0.15s ease;
+}
+.pc-col + .pc-col .pc-bar { transition-delay: 0.08s; }
+.pc-val {
+  position: absolute; left: -14px; right: -14px; bottom: calc(var(--v) + 5px);
+  text-align: center; font-size: clamp(0.8rem, 3.4cqw, 1rem); line-height: 1.1; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--fl-ink); text-shadow: var(--halo);
+  transition: opacity 0.4s ease 0.55s;
+}
+.js .fl-chart--percapita:not(.is-in) .pc-bar { transform: scaleY(0); }
+.js .fl-chart--percapita:not(.is-in) .pc-val { opacity: 0; }
+/* While one year's note is open, the other years' bars step back. */
+.pc-plot.has-tip .pc-year:not(.is-tipped) .pc-bar { opacity: 0.35; }
+
+/* Microplastics in three wetlands: one bottle for each particle per litre. */
+.fl-chart--sundarbans {
+  --fl-image: url('../assets/report/sundarbans-bg.webp');
+  --fl-min-w: 613px;
+  --bottle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='17.2 10.05 21.65 56.65'%3E%3Cpath d='M24.1579 10.6204C24.9699 10.1065 30.6541 10.1065 31.4662 10.6204C32.0752 10.963 32.0752 12.3333 32.0752 13.5324L31.8722 14.5602L32.4812 14.7315V15.2454H31.4662C31.4662 16.2731 31.4662 16.9583 32.2782 17.9861C34.3083 20.213 36.7444 23.8102 37.5564 26.2083C38.1654 27.9213 38.3684 29.8056 38.1654 30.8333L37.5564 31.8611C37.9624 32.8889 37.7594 35.4583 37.9624 37L37.3534 38.0278L37.9624 39.0556C37.5564 42.3102 36.9474 47.1065 36.9474 49.8472C36.9474 52.2454 37.7594 54.3009 38.1654 56.1852C38.7744 58.7546 38.1654 61.838 37.1504 63.7222C36.7444 64.5787 35.7293 65.0926 34.5113 64.75C33.6993 64.5787 33.4962 65.7778 32.4812 65.9491C30.0451 66.6343 29.2331 64.75 28.015 64.5787C26.797 64.5787 26.188 66.1204 24.5639 66.1204C23.3459 66.1204 22.7368 65.7778 22.1278 65.0926C21.7218 64.5787 21.1128 64.9213 20.3008 64.75C18.6767 64.4074 18.0677 62.8657 17.6617 60.6389C17.2556 58.7546 17.2556 57.0417 17.8647 54.9861C18.4737 53.2731 18.8797 51.9028 18.8797 49.8472C18.8797 46.5926 18.4737 42.1389 18.0677 39.5694C17.8647 38.8843 18.0677 38.1991 18.2707 37.8565C17.6617 37.5139 17.8647 36.1435 17.8647 35.1157L18.0677 32.5463C17.2556 31.6898 17.4587 30.1481 17.6617 28.6065C18.0677 24.838 20.0978 21.5833 23.1429 17.9861C24.1579 17.1296 24.1579 16.4444 24.1579 15.2454H23.3459V14.7315L23.7519 14.5602L23.5489 13.5324C23.5489 12.5046 23.5489 11.1343 24.1579 10.6204Z'/%3E%3C/svg%3E");
+}
+.fl-chart--sundarbans .fl-title { font-size: clamp(1.45rem, 1.1rem + 1.4vw, 2.3rem); line-height: 1.22; }
+.fl-chart--sundarbans .fl-deck { color: #2c4430; }
+.pg-key {
+  display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin: -6px 0 6px;
+  font-size: 0.875rem; line-height: 1; color: #4a4d50;
+}
+.pg-key .pg-i { flex: none; width: 12px; height: 30px; color: #6b6e71; background: currentColor; -webkit-mask-size: auto 100%; mask-size: auto 100%; }
+.pg-plot, .pg-axis {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: clamp(8px, 3cqw, 44px); padding-inline: clamp(0px, 3cqw, 56px);
+}
+.pg-plot { align-items: end; border-bottom: 1.5px solid #675f5f; }
+.pg-col { display: flex; flex-direction: column; align-items: center; min-width: 0; cursor: default; }
+.pg-val {
+  margin: 0 0 clamp(6px, 1.2cqw, 14px); font-size: clamp(1.1rem, 6cqw, 2rem); line-height: 1; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: #2d2f31; text-shadow: var(--halo);
+}
+.pg-icons {
+  display: flex; flex-wrap: wrap-reverse; color: var(--c);
+  /* Six rows of bottles are twice as tall as this width, so it also follows the screen's height. */
+  width: min(100%, 12.5rem, max(6rem, 28vh - 30px));
+  width: min(100%, 12.5rem, max(6rem, 28svh - 30px));
+  filter: drop-shadow(0 0 1px rgba(250, 249, 244, 0.95)) drop-shadow(0 0 3px rgba(250, 249, 244, 0.7));
+}
+.pg-col--sundarbans { --c: #c40606; --ghost: rgba(196, 6, 6, 0.2); }
+.pg-col--kaptai { --c: #ad7d27; --ghost: rgba(173, 125, 39, 0.24); }
+.pg-col--tanguar { --c: #435a37; --ghost: rgba(67, 90, 55, 0.22); }
+.pg-i {
+  display: block; flex: 0 0 25%; aspect-ratio: 3 / 4; background: currentColor; transition: opacity 0.15s ease;
+  -webkit-mask: var(--bottle) center / auto 80% no-repeat; mask: var(--bottle) center / auto 80% no-repeat;
+}
+/* A fraction of a particle fills that share of the bottle; the rest is left as a pale outline. */
+.pg-i--part { background: linear-gradient(to top, currentColor calc(10% + var(--fill) * 0.8), var(--ghost) 0); }
+/* While one place's note is open, the other places' bottles fade, as in Flourish. */
+.pg-plot.has-tip .pg-col:not(.is-tipped) .pg-i { opacity: 0.25; }
+.pg-axis span {
+  padding-top: 9px; text-align: center; font-size: clamp(0.75rem, 4.4cqw, 1.5rem); line-height: 1.15; font-weight: 700;
+  color: #000; text-shadow: var(--halo); text-wrap: balance;
+}
+/* The source runs plainly under a dotted rule; a soft halo keeps it legible over the water. */
+.fl-source--rule {
+  width: auto; margin-top: clamp(10px, 1.6vw, 16px); padding: 7px 0 0;
+  border-top: 1.5px dotted #536555; background: none; box-shadow: none; color: #1f1b1b; text-shadow: var(--halo);
+}
+.js .fl-chart--sundarbans .pg-icons { transition: opacity 0.6s var(--ease-out) 0.15s, transform 0.8s var(--ease-out) 0.15s; }
+.js .fl-chart--sundarbans:not(.is-in) .pg-icons { opacity: 0; transform: translate3d(0, 14px, 0); }
+
+/* ---------------------------------------------------------------- chart notes
+   One note for the page, fixed to the viewport; report.js fills it and keeps it on screen. */
+.chart-tip {
+  position: fixed; z-index: 60; left: 0; top: 0; width: max-content; max-width: min(280px, calc(100vw - 16px));
+  background: #fff; color: #222; font-family: var(--font); font-size: 0.875rem; line-height: 1.5;
+  box-shadow: 0 10px 30px rgba(17, 21, 27, 0.22), 0 0 0 1px rgba(17, 21, 27, 0.07);
+  pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.15s ease, visibility 0.15s;
+}
+.chart-tip.is-on { opacity: 1; visibility: visible; }
+.chart-tip p { margin: 0; }
+.chart-tip__title { padding: 11px 13px 0; font-size: 1rem; line-height: 1.3; font-weight: 700; color: #111; }
+.chart-tip__body { padding: 6px 13px 12px; }
+.chart-tip--dark .chart-tip__title { padding: 7px 12px 8px; background: #333; color: #fff; font-size: 0.9375rem; }
+.chart-tip--dark .chart-tip__body { padding: 8px 12px 10px; }
 
 @media (min-width: 760px) {
-  .growth-layout { grid-template-columns: minmax(180px, 0.62fr) minmax(0, 2fr); align-items: center; gap: clamp(40px, 6vw, 88px); }
-  .growth-finding { flex-direction: column; gap: 16px; }
   .recycling-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr); }
-  .concentration-unit-row, .concentration-row, .concentration-axis-row { grid-template-columns: 190px minmax(0, 1fr); column-gap: 28px; }
-  .concentration-unit-row > span, .concentration-axis-row > span { display: block; }
-  .concentration-label { flex-direction: column; justify-content: center; gap: 4px; padding: 16px 0; }
-  .concentration-track { min-height: 96px; }
 }
 @media (max-width: 520px) {
   .time-bars { height: 188px; }
   .time-bar { padding: 0 10px 12px; }
   .time-bar span { font-size: 0.8125rem; }
 }
+/* On a phone the panels run edge to edge. */
+@media (max-width: 600px) {
+  .fl-chart { width: 100%; }
+  .fl-source { font-size: 0.8125rem; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .growth-bar, .waffle-cell, .concentration-range { transition: none; }
-  .js .report-chart--growth:not(.is-in) .growth-bar,
+  .waffle-cell, .pc-bar, .pc-val, .pg-icons, .pg-i, .chart-tip { transition: none !important; }
   .js .report-chart--recycling:not(.is-in) .waffle-cell,
-  .js .report-chart--microplastics:not(.is-in) .concentration-range { opacity: 1; transform: none; }
-  .js .report-chart--microplastics:not(.is-in) .concentration-range { transform: translateY(-50%); }
+  .js .fl-chart--percapita:not(.is-in) .pc-bar,
+  .js .fl-chart--percapita:not(.is-in) .pc-val,
+  .js .fl-chart--sundarbans:not(.is-in) .pg-icons { opacity: 1; transform: none; }
 }
 @media print {
-  .chart-data { display: none; }
-  .waffle-cell, .growth-bar, .time-bar--pet { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .waffle-cell, .time-bar--pet, .fl-chart, .fl-bg, .fl-chip, .pc-bar, .pg-i { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .chart-tip { display: none; }
 }

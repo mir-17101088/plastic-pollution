@@ -59,6 +59,17 @@ a { color: inherit; }
 .hero-canvas { display: block; opacity: 0; transition: opacity 0.35s ease-out; }
 .hero.is-live .hero-canvas { opacity: 1; }
 
+/* Once the bag lies on the mud, a dashed maroon ring marks it, so it can be followed through
+   the centuries on a small screen.  hero.js places and sizes it; a pale halo under the dashes
+   keeps it visible over dark mud and bright water alike. */
+.hero-ring {
+  position: absolute; z-index: 2; left: 0; top: 0; overflow: visible; pointer-events: none;
+  opacity: 0; transform-origin: 50% 50%; will-change: transform, opacity;
+}
+.hero-ring circle { fill: none; }
+.hero-ring__halo { stroke: rgba(255, 248, 236, 0.62); stroke-width: 5.5; }
+.hero-ring__line { stroke: #800000; stroke-width: 2.6; stroke-dasharray: 7 5; stroke-linecap: round; }
+
 /* A soft paper wash at the top keeps the logo legible over any sky. */
 .hero-stage::after {
   content: ''; position: absolute; inset: 0 0 auto; height: 22%; z-index: 1; pointer-events: none;

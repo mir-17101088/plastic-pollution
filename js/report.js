@@ -30,6 +30,72 @@ const revealer = new IntersectionObserver((entries) => {
 }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach((el) => revealer.observe(el));
 
+// ------------------------------------------------------------------ chart notes
+// A bar pair or a bottle stack carries a short note ([data-tip]), as in the Flourish originals.
+// A mouse shows it on hover, beside the pointer; a tap shows it where the finger lands, and a
+// tap anywhere else, a scroll or Escape closes it.  One note serves the page.  It is fixed to
+// the viewport and always kept inside it, so no chart edge or screen size can cut it off.
+const tipTargets = [...document.querySelectorAll('[data-tip]')];
+const tip = document.createElement('div');
+tip.className = 'chart-tip';
+tip.setAttribute('aria-hidden', 'true');
+tip.innerHTML = '<p class="chart-tip__title"></p><p class="chart-tip__body"></p>';
+const tipTitle = tip.firstChild;
+const tipBody = tip.lastChild;
+let tipFor = null;
+
+function showTip(target, x, y) {
+  if (tipFor !== target) {
+    hideTip();
+    tipFor = target;
+    const group = target.parentElement;
+    tip.classList.toggle('chart-tip--dark', group.dataset.tipStyle === 'dark');
+    tipTitle.textContent = target.dataset.tipTitle || '';
+    tipBody.textContent = target.dataset.tip;
+    group.classList.add('has-tip');
+    target.classList.add('is-tipped');
+    tip.classList.add('is-on');
+  }
+  // Above the pointer when there is room, otherwise below it; never past a screen edge.
+  const m = 8;
+  const gap = 16;
+  const w = tip.offsetWidth;
+  const h = tip.offsetHeight;
+  const vw = document.documentElement.clientWidth;
+  const left = clamp(x - w / 2, m, Math.max(m, vw - w - m));
+  let top = y - h - gap;
+  if (top < m) top = y + gap;
+  top = clamp(top, m, Math.max(m, innerHeight - h - m));
+  tip.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
+}
+
+function hideTip() {
+  if (!tipFor) return;
+  tipFor.parentElement.classList.remove('has-tip');
+  tipFor.classList.remove('is-tipped');
+  tipFor = null;
+  tip.classList.remove('is-on');
+}
+
+if (tipTargets.length) {
+  document.body.append(tip);
+  for (const target of tipTargets) {
+    target.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') showTip(target, e.clientX, e.clientY); });
+    target.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && tipFor === target) hideTip(); });
+  }
+  let lastPointer = 'mouse';
+  document.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; }, { passive: true });
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest?.('[data-tip]');
+    if (!target) { hideTip(); return; }
+    if (lastPointer !== 'mouse' && tipFor === target) { hideTip(); return; }
+    showTip(target, e.clientX, e.clientY);
+  });
+  addEventListener('scroll', hideTip, { passive: true });
+  addEventListener('resize', hideTip);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideTip(); });
+}
+
 // ------------------------------------------------------------------ the live polythene count
 // ESDO (2022): close to 1.4 million polythene bags are discarded after a single use in Dhaka
 // every day.  Spread evenly over the day's 86,400 seconds, that is about 16 bags a second.

@@ -57,6 +57,36 @@ function placeYear(s) {
 }
 const GLOW_SECONDS = 2.6;
 
+// The ring that marks the bag once it lies on the mud (see .hero-ring).  It closes in on the bag
+// as the sheet settles and stays, in the same place on screen, through the time-lapse.
+const ring = hero.querySelector('.hero-ring');
+const RING_R = 56;                       // design px around the bag's centre
+function placeRing(s) {
+  if (!ring || !state.cfg) return;
+  const fall = range(s, TIMES.fall[0], TIMES.fall[1]);
+  const on = reduceMotion.matches ? fall : smooth(range(fall, 0.93, 1));
+  ring.style.opacity = on.toFixed(3);
+  if (on <= 0) return;
+  const [cx, cy] = state.cfg.bag.center;
+  const [x0, y0, vw] = state.view;
+  const k = stage.clientWidth / vw;
+  const r = Math.round(clamp(RING_R * k, 32, 72));
+  const box = r + 5;
+  if (r !== state.ringR) {
+    state.ringR = r;
+    ring.setAttribute('width', 2 * box);
+    ring.setAttribute('height', 2 * box);
+    ring.setAttribute('viewBox', `${-box} ${-box} ${2 * box} ${2 * box}`);
+    // Whole dashes only, so there is no seam where the circle closes.
+    const around = 2 * Math.PI * r;
+    const seg = around / Math.round(around / 12.5);
+    for (const c of ring.children) c.setAttribute('r', r);
+    ring.lastElementChild.setAttribute('stroke-dasharray', `${(seg * 0.58).toFixed(2)} ${(seg * 0.42).toFixed(2)}`);
+  }
+  const grow = reduceMotion.matches ? 1 : 1 + 0.4 * (1 - on);
+  ring.style.transform = `translate3d(${((cx - x0) * k - box).toFixed(1)}px, ${((cy - y0) * k - box).toFixed(1)}px, 0) scale(${grow.toFixed(3)})`;
+}
+
 // Screen position of the third card for scroll position s, in px from the top of the stage.
 function card3Top(s) {
   const [a, b] = TIMES.lapse;
@@ -940,6 +970,7 @@ function frame(now) {
   updateYear();
   placeCard3(state.s);
   placeYear(state.s);
+  placeRing(state.s);
   const glowing = state.glowStart && (now - state.glowStart) / 1000 < GLOW_SECONDS;
   if (state.s !== goal || glowing) state.raf = requestAnimationFrame(frame);
   else state.lastTime = 0;
@@ -1066,6 +1097,7 @@ window.__hero = {
     state.glow = glow;
     placeCard3(s);
     placeYear(s);
+    placeRing(s);
     render();
     updateYear();
   },
