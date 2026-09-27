@@ -1,0 +1,169 @@
+/* Report figures.  Titles state the finding; every value is printed on the face.  Marks are
+   ink, grey and the page's single accent, always doubled by a label, a pattern or a shape,
+   so each chart reads in greyscale.  No text is coloured. */
+.report-chart {
+  --chart-then: #a3a5a7;
+  --chart-line: rgba(18, 21, 24, 0.14);
+  margin-block: var(--space-block);
+  padding-top: clamp(20px, 2.4vw, 28px);
+  border-top: 1px solid var(--ink);
+  color: var(--ink);
+}
+.report-chart .chart-heading, .policy-targets .chart-heading { max-width: 44rem; margin: 0 0 clamp(32px, 4vw, 48px); }
+.chart-heading h3, .chart-heading h2 {
+  margin: 0; font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.75rem); line-height: 1.08; font-weight: 500;
+  letter-spacing: -0.03em; text-wrap: balance;
+}
+.chart-deck { max-width: 40rem; margin: 14px 0 0; font-size: 1.0625rem; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.chart-unit { margin: 0; font-size: 0.875rem; line-height: 1.4; color: var(--ink-3); }
+.chart-source { max-width: 62rem; margin: 26px 0 0; font-size: 0.8125rem; line-height: 1.55; color: var(--ink-3); }
+.chart-source strong { font-weight: 600; color: var(--ink-2); }
+.chart-data { margin-top: 6px; font-size: 0.875rem; color: var(--ink-3); }
+.chart-data summary {
+  display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; font-weight: 600; color: var(--ink-2);
+  list-style: none;
+}
+.chart-data summary::-webkit-details-marker { display: none; }
+.chart-data summary::before { content: '+'; display: inline-block; width: 1.1em; font-weight: 400; }
+.chart-data[open] summary::before { content: '−'; }
+.chart-data summary:hover { color: var(--ink); }
+.chart-data table { width: 100%; margin: 6px 0 12px; border-collapse: collapse; font-size: 0.9375rem; text-align: left; color: var(--ink); font-variant-numeric: tabular-nums; }
+.chart-data caption { margin-bottom: 8px; text-align: left; font-weight: 600; }
+.chart-data th, .chart-data td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--chart-line); vertical-align: top; }
+.chart-data thead th { font-weight: 600; color: var(--ink-2); }
+.chart-data tbody th { font-weight: 500; }
+
+/* ---------------------------------------------------------------- time to break down */
+.time-scale { padding-top: 4px; }
+.time-bars { position: relative; height: clamp(150px, 20vw, 176px); }
+.time-bar {
+  position: absolute; top: 0; bottom: 0; left: var(--from); width: calc(var(--to) - var(--from));
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 6px;
+  padding: 0 clamp(10px, 1.6vw, 18px) clamp(14px, 1.8vw, 20px);
+}
+.time-bar strong { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.6rem); line-height: 1; font-weight: 400; letter-spacing: -0.03em; }
+.time-bar span { font-size: clamp(0.875rem, 0.8rem + 0.25vw, 1rem); line-height: 1.3; max-width: 24ch; }
+.time-bar--past { background: var(--tint); color: var(--ink); border-left: 2px solid var(--ink); }
+.time-bar--pet {
+  background-color: var(--accent); color: #fffaf5;
+  background-image: repeating-linear-gradient(135deg, transparent 0 7px, rgba(255, 248, 238, 0.16) 7px 8px);
+}
+.time-axis { position: relative; height: 34px; border-top: 1px solid var(--ink); }
+.time-axis span { position: absolute; top: 9px; left: var(--tick); transform: translateX(-50%); font-size: 0.875rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.time-axis span:first-child { transform: none; }
+.time-axis span:last-child { transform: translateX(-100%); }
+.time-axis .is-now { font-weight: 600; color: var(--ink); }
+.time-axis .is-now::before { content: ''; position: absolute; left: 50%; top: -15px; width: 1px; height: 11px; background: var(--ink); }
+
+/* ---------------------------------------------------------------- waste volume */
+.growth-layout { display: grid; gap: clamp(28px, 4vw, 48px); }
+.growth-finding { display: flex; align-items: baseline; gap: 18px; margin: 0; }
+.growth-finding > strong {
+  font-size: clamp(4.5rem, 2.6rem + 7vw, 8.5rem); line-height: 0.82; font-weight: 700;
+  letter-spacing: -0.06em; white-space: nowrap;
+}
+.growth-finding strong span { font-size: 0.6em; letter-spacing: 0; }
+.growth-finding > span { max-width: 13ch; font-size: 1.0625rem; line-height: 1.35; color: var(--ink-2); }
+.growth-comparison { min-width: 0; }
+.growth-comparison > .chart-unit { margin-bottom: 18px; }
+.growth-row + .growth-row { margin-top: 22px; }
+.growth-row-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.growth-row-label span { font-size: 1rem; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.growth-row-label strong { font-size: clamp(1.6rem, 1.3rem + 1vw, 2.25rem); line-height: 1; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.growth-track { height: clamp(36px, 4vw, 48px); border-left: 1px solid var(--ink); }
+.growth-bar { width: var(--bar-size); height: 100%; transform-origin: 0 50%; transition: transform 0.8s var(--ease-out); }
+.growth-row + .growth-row .growth-bar { transition-delay: 0.12s; }
+.growth-bar--then { background: var(--chart-then); }
+.growth-bar--now { background: var(--accent); }
+.js .report-chart--growth:not(.is-in) .growth-bar { transform: scaleX(0); }
+.growth-axis { position: relative; height: 30px; margin-top: 8px; border-top: 1px solid var(--chart-line); }
+.growth-axis span, .concentration-axis span {
+  position: absolute; top: 8px; left: var(--tick); transform: translateX(-50%);
+  font-size: 0.8125rem; line-height: 1; color: var(--ink-3); font-variant-numeric: tabular-nums;
+}
+.growth-axis span:first-child, .concentration-axis span:first-child { transform: none; }
+
+/* ---------------------------------------------------------------- recovery: one hundred squares */
+.recycling-layout { display: grid; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.waffle-wrap { width: 100%; max-width: 440px; }
+.recycling-waffle { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: clamp(3px, 0.5vw, 5px); }
+.waffle-cell { aspect-ratio: 1; transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out); }
+.waffle-cell--recycled, .chart-swatch--recycled { background: var(--ink); }
+.waffle-cell--unrecycled, .chart-swatch--unrecycled {
+  background-color: var(--accent);
+  background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgba(255, 248, 238, 0.3) 4px 5px);
+}
+.js .report-chart--recycling:not(.is-in) .waffle-cell { opacity: 0; transform: scale(0.6); }
+.waffle-unit { margin: 14px 0 0; font-size: 0.875rem; color: var(--ink-3); }
+.recycling-finding { display: flex; align-items: baseline; gap: 14px; margin: 0; }
+.recycling-finding strong { font-size: clamp(4.5rem, 2.6rem + 7vw, 8.5rem); line-height: 0.82; font-weight: 300; letter-spacing: -0.06em; }
+.recycling-finding strong span { font-size: 0.5em; letter-spacing: 0; }
+.recycling-finding > span { font-size: 1.375rem; font-weight: 550; }
+.recycling-context { max-width: 22ch; margin: 18px 0 0; font-size: clamp(1.3rem, 1.15rem + 0.5vw, 1.55rem); line-height: 1.3; letter-spacing: -0.01em; }
+.recycling-key { display: flex; flex-wrap: wrap; gap: 10px 24px; margin: 24px 0 0; padding: 0; list-style: none; }
+.recycling-key li { display: flex; align-items: center; gap: 10px; font-size: 1rem; color: var(--ink-2); }
+.recycling-key strong { font-weight: 600; color: var(--ink); }
+.chart-swatch { flex: none; display: inline-block; width: 16px; height: 16px; }
+.recycling-caution { max-width: 34ch; margin: 18px 0 0; font-size: 0.875rem; line-height: 1.5; color: var(--ink-3); }
+
+/* ---------------------------------------------------------------- concentrations: ranges and a lone maximum */
+.concentration-unit-row, .concentration-row, .concentration-axis-row { display: grid; grid-template-columns: 1fr; }
+.concentration-unit-row > span, .concentration-axis-row > span { display: none; }
+.concentration-unit-row { margin-bottom: 10px; }
+.concentration-label { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 14px 0 6px; }
+.concentration-label strong { font-size: 1rem; font-weight: 600; }
+.concentration-label > span { font-size: clamp(1.5rem, 1.25rem + 0.9vw, 2rem); line-height: 1.1; letter-spacing: -0.02em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.concentration-label small { font-size: 0.875rem; letter-spacing: 0; color: var(--ink-3); }
+.concentration-track {
+  position: relative; min-height: 56px; border-left: 1px solid var(--ink);
+  background-image: repeating-linear-gradient(to right, transparent 0 calc(11.1111% - 1px), var(--chart-line) calc(11.1111% - 1px) 11.1111%);
+}
+.concentration-track--fish { --series: var(--ink); }
+.concentration-track--crabs { --series: var(--ink-3); }
+.concentration-track--sediment { --series: var(--accent); }
+.concentration-range {
+  position: absolute; top: 50%; left: var(--range-start); right: calc(100% - var(--range-end)); height: 6px;
+  transform: translateY(-50%); transform-origin: 0 50%; background: var(--series);
+  transition: transform 0.7s var(--ease-out);
+}
+.js .report-chart--microplastics:not(.is-in) .concentration-range { transform: translateY(-50%) scaleX(0); }
+.concentration-point { position: absolute; top: 50%; left: var(--point); width: 15px; height: 15px; transform: translate(-50%, -50%); background: var(--series); }
+.concentration-point--circle { border-radius: 50%; }
+.concentration-point--diamond { width: 12px; height: 12px; transform: translate(-50%, -50%) rotate(45deg); }
+.concentration-point--maximum { width: 20px; height: 20px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.concentration-axis { position: relative; height: 30px; border-top: 1px solid var(--chart-line); }
+.concentration-axis span:last-child { transform: translateX(-100%); }
+.concentration-notes { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 18px; }
+.concentration-notes p { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 0.875rem; line-height: 1.5; color: var(--ink-3); }
+.range-key { position: relative; flex: none; display: inline-block; width: 26px; height: 3px; background: var(--ink); }
+.range-key::before, .range-key::after { content: ''; position: absolute; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); }
+.range-key::before { left: 0; }
+.range-key::after { right: 0; }
+.maximum-key { flex: none; display: inline-block; width: 14px; height: 14px; background: var(--accent); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+
+@media (min-width: 760px) {
+  .growth-layout { grid-template-columns: minmax(180px, 0.62fr) minmax(0, 2fr); align-items: center; gap: clamp(40px, 6vw, 88px); }
+  .growth-finding { flex-direction: column; gap: 16px; }
+  .recycling-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr); }
+  .concentration-unit-row, .concentration-row, .concentration-axis-row { grid-template-columns: 190px minmax(0, 1fr); column-gap: 28px; }
+  .concentration-unit-row > span, .concentration-axis-row > span { display: block; }
+  .concentration-label { flex-direction: column; justify-content: center; gap: 4px; padding: 16px 0; }
+  .concentration-track { min-height: 96px; }
+}
+@media (max-width: 520px) {
+  .time-bars { height: 188px; }
+  .time-bar { padding: 0 10px 12px; }
+  .time-bar span { font-size: 0.8125rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .growth-bar, .waffle-cell, .concentration-range { transition: none; }
+  .js .report-chart--growth:not(.is-in) .growth-bar,
+  .js .report-chart--recycling:not(.is-in) .waffle-cell,
+  .js .report-chart--microplastics:not(.is-in) .concentration-range { opacity: 1; transform: none; }
+  .js .report-chart--microplastics:not(.is-in) .concentration-range { transform: translateY(-50%); }
+}
+@media print {
+  .chart-data { display: none; }
+  .waffle-cell, .growth-bar, .time-bar--pet { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}

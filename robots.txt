@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: http://campaign.thedailystar.net/plastic-pollution/sitemap.xml

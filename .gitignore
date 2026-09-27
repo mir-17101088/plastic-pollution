@@ -1,0 +1,8 @@
+node_modules/
+dist/
+checks/
+.vercel/
+__pycache__/
+*.pyc
+_previous-version/
+release/

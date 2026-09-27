@@ -1,0 +1,17 @@
+{
+  "name": "plastic-remains-report",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node tools/build_site.cjs",
+    "preview": "node tools/serve_site.cjs",
+    "audit": "node tools/audit_site.cjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "lighthouse": "^13.5.0"
+  }
+}
