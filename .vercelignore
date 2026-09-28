@@ -1,0 +1,17 @@
+# Files that are in the repository but are not part of the website.
+README.md
+tools/
+.gitignore
+# Left over from the first version of the repository.  They are not used by the site; if they
+# are still in the repository, this keeps them out of the Vercel preview (and package.json out
+# of the way, so Vercel never tries to run the old build).
+package.json
+package-lock.json
+DEPLOYMENT.md
+robots.txt
+/*.jpeg
+assets/report/buriganga-inspection*
+assets/report/plastic-remains-og.jpg
+assets/icons/arrow-up-right.svg
+assets/icons/brand-whatsapp.svg
+assets/icons/shopping-bag.svg

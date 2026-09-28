@@ -1,8 +1,8 @@
-node_modules/
-dist/
-checks/
 .vercel/
+node_modules/
 __pycache__/
 *.pyc
-_previous-version/
-release/
+.DS_Store
+Thumbs.db
+# Full-size original photographs are not needed to host the site; keep them out of the repository.
+originals/
