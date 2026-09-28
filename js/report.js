@@ -117,8 +117,7 @@ const count = {
   endShown: false,      // the closing number is showing
   endCountUpStart: 0,
   dockOn: false,
-  flight: null,         // { start } while the corner counter flies down
-  home: null,           // the dock's resting rectangle
+  flight: null,         // { start, home } while the corner counter flies down
   raf: 0,
   written: new Map(),
 };
@@ -154,13 +153,14 @@ function setDock(on) {
   if (on === count.dockOn) return;
   count.dockOn = on;
   dock.classList.toggle('is-on', on);
-  if (on) count.home = null;
 }
 
 function frame(now) {
   count.raf = 0;
   // The story is below the long intro. Avoid forcing layout of its offscreen content.
   if (story.getBoundingClientRect().top >= innerHeight) {
+    // Back up in the opening mid-flight: the counter must not be left hanging over it.
+    if (count.flight) land(now);
     setDock(false);
     return;
   }
@@ -182,9 +182,8 @@ function frame(now) {
   // Coming back later, it simply steps aside: the closing number is already showing.
   if (endArrived && !count.flight) {
     if (!count.endShown && count.dockOn && !reduceMotion.matches) {
-      count.home = count.home || dock.getBoundingClientRect();
-      count.flight = { start: now };
-      dock.classList.add('is-flying');
+      dock.classList.add('is-flying');   // no transitions from here on
+      count.flight = { start: now, home: restingRect() };
     } else {
       if (!count.endShown) showEnd(now, !count.dockOn);
       setDock(false);
@@ -213,8 +212,21 @@ function showEnd(now, countUp) {
   ending.classList.remove('is-waiting');
 }
 
+// The dock's place in its corner, measured without the flight's transform.  Only called while
+// the dock is flying, when it has no transitions, so the measurement starts none.
+function restingRect() {
+  const t = dock.style.transform;
+  dock.style.transform = 'none';
+  const r = dock.getBoundingClientRect();
+  dock.style.transform = t;
+  return r;
+}
+
 function fly(now, endRect) {
-  const home = count.home;
+  // A resize (a phone's address bar sliding away as the reader flicks down) can move the
+  // corner: measure it again rather than fly from where it used to be.
+  if (!count.flight.home) count.flight.home = restingRect();
+  const home = count.flight.home;
   const k = clamp((now - count.flight.start) / FLIGHT_MS);
   const e = easeInOut(k);
   // Centre to centre, following the number even if the page keeps scrolling.
@@ -224,15 +236,19 @@ function fly(now, endRect) {
   dock.style.transform = `translate3d(${(dx * e).toFixed(1)}px, ${(dy * e).toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
   dock.style.opacity = String(1 - clamp((k - 0.62) / 0.3));
   if (k > 0.55 && !count.endShown) showEnd(now, false);
-  if (k >= 1) {
-    count.flight = null;
-    count.dockOn = false;
-    dock.classList.remove('is-on');
-    // Let it rest invisibly in its corner again before transitions come back on.
-    dock.style.transform = '';
-    dock.style.opacity = '';
-    requestAnimationFrame(() => dock.classList.remove('is-flying'));
-  }
+  if (k >= 1) land(now);
+}
+
+// The flight is over: the big number takes over and the counter goes back to its corner, hidden.
+function land(now) {
+  if (!count.endShown) showEnd(now, false);
+  count.flight = null;
+  count.dockOn = false;
+  dock.classList.remove('is-on');
+  // Let it rest invisibly in its corner again before transitions come back on.
+  dock.style.transform = '';
+  dock.style.opacity = '';
+  requestAnimationFrame(() => dock.classList.remove('is-flying'));
 }
 
 function wake() {
@@ -242,10 +258,58 @@ function wake() {
 if (live && endNum && ending && dock && story) {
   ending.classList.add('is-waiting');
   addEventListener('scroll', wake, { passive: true });
-  addEventListener('resize', () => { count.home = null; wake(); });
+  addEventListener('resize', () => {
+    if (count.flight) count.flight.home = null;
+    wake();
+  });
   document.addEventListener('visibilitychange', wake);
   wake();
 }
+// ------------------------------------------------------------------ the report, laid out early
+// The browser skips the report until it comes near the screen (content-visibility in
+// report.css), which keeps the first paint quick.  Laying it out the first time is one long
+// frame, mostly shaping its text, and left to itself that frame lands just as the opening ends
+// and the title scrolls in, or as a reader drags straight to the bottom.  So it is done ahead
+// of time, the first time the reader pauses in the opening once the animation is running, and
+// the report is then skipped again: the finished layout is kept for when the reader gets there.
+const reportBody = document.querySelector('.report-body');
+const heroEl = document.getElementById('hero');
+const PAUSE_MS = 800;
+const supportsSkipping = !!(window.CSS && CSS.supports && CSS.supports('content-visibility', 'auto'));
+if (reportBody && heroEl && supportsSkipping) {
+  let lastInput = 0;
+  let touching = false;
+  const note = () => { lastInput = performance.now(); };
+  for (const type of ['scroll', 'wheel', 'keydown', 'pointerdown', 'touchmove']) {
+    addEventListener(type, note, { passive: true, capture: true });
+  }
+  addEventListener('touchstart', () => { touching = true; note(); }, { passive: true, capture: true });
+  for (const type of ['touchend', 'touchcancel']) {
+    addEventListener(type, () => { touching = false; note(); }, { passive: true, capture: true });
+  }
+  const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1000 }) : setTimeout(fn, 50));
+  let since = 0;
+  const layOut = () => {
+    if (!since) since = performance.now();
+    // Let the opening's animation get going first (or give up waiting for it after a while).
+    const heroBusy = !heroEl.classList.contains('is-live') && performance.now() - since < 6000;
+    const wait = PAUSE_MS - (performance.now() - lastInput);
+    if (heroBusy || touching || wait > 0) { setTimeout(layOut, Math.max(wait, 200)); return; }
+    idle(() => {
+      if (touching || performance.now() - lastInput < PAUSE_MS) { setTimeout(layOut, 200); return; }
+      reportBody.style.contentVisibility = 'visible';
+      void reportBody.offsetHeight;      // style and layout, now, while nothing moves
+      requestAnimationFrame(() => { reportBody.style.contentVisibility = ''; });
+    });
+  };
+  const begin = () => {
+    const fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    fonts.then(() => setTimeout(layOut, 500));
+  };
+  if (document.readyState === 'complete') begin();
+  else addEventListener('load', begin, { once: true });
+}
+
 // ------------------------------------------------------------------ back to top
 // Checked at most once a frame, and the button is only touched when it has to change.
 const backToTop = document.querySelector('.back-to-top');

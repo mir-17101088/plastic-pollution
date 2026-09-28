@@ -562,7 +562,7 @@ async function compile(vsSrc, fsSrc) {
 const state = {
   set: null, cfg: null, tex: {}, ready: false, gridCount: 0,
   s: 0, target: 0, lastYear: null, raf: 0, lastTime: 0, view: [0, 0, DW, DH], dpr: 1,
-  cw: 1, ch: 1, card3H: 0, heroTop: 0, card3T: '', gen: 0, redraw: 0,
+  cw: 1, ch: 1, card3H: 0, heroTop: 0, heroEnd: 1, card3T: '', gen: 0, redraw: 0,
 };
 
 // Sizes are read once per resize and never while scrolling, so no frame waits for a layout.
@@ -574,6 +574,8 @@ function measure() {
   state.ch = ch;
   state.card3H = card3.offsetHeight;
   state.heroTop = hero.getBoundingClientRect().top + window.pageYOffset;
+  // Scroll position at which the pinned stage has left the top of the screen.
+  state.heroEnd = hero.offsetHeight / ch;
   return changed;
 }
 measure();
@@ -610,10 +612,61 @@ function texRect() {
   return state.set === 'tall' ? [state.cfg.tall[0], 0, state.cfg.tall[1] - state.cfg.tall[0], DH] : [0, 0, DW, DH];
 }
 
-async function loadImage(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${url}: ${res.status}`);
-  const blob = await res.blob();
+// The pictures are downloaded from the start, straight after the opening picture the reader is
+// looking at, three at a time and in the order the scroll needs them.  Decoding them and putting
+// them on the GPU still waits until the renderer is prepared, so the first paint stays light;
+// by then most of the bytes are already here.
+const downloads = {};
+const queue = [];
+let fetching = 0;
+// A phone's connection can drop a request now and then: try once more before giving up (and
+// falling back to the plain crossfade).
+function get(url, priority, tries) {
+  return fetch(url, { priority })
+    .then((res) => {
+      if (!res.ok) throw new Error(`${url}: ${res.status}`);
+      return res.blob();
+    })
+    .catch((e) => {
+      if (tries <= 1) throw e;
+      return new Promise((resolve) => setTimeout(resolve, 800)).then(() => get(url, priority, tries - 1));
+    });
+}
+function pump() {
+  while (fetching < 3 && queue.length) {
+    const job = queue.shift();
+    fetching += 1;
+    get(job.url, job.priority, 2)
+      .then(job.resolve, job.reject)
+      .then(() => { fetching -= 1; pump(); });
+  }
+}
+function download(file, priority, urgent) {
+  if (!downloads[file]) {
+    downloads[file] = new Promise((resolve, reject) => {
+      const job = { url: `assets/hero/${file}.webp`, priority, resolve, reject };
+      if (urgent) queue.unshift(job);   // wanted this moment: ahead of the prefetches
+      else queue.push(job);
+      pump();
+    });
+    downloads[file].catch(() => {});   // a prefetch nobody uses may fail quietly
+  }
+  return downloads[file];
+}
+// Each download is used once, so its bytes are not kept; asking again (after the GPU was lost,
+// say) fetches from the browser's cache.
+const taken = {};
+function take(file) {
+  const p = download(file, 'high', true);
+  delete downloads[file];
+  taken[file] = true;
+  return p;
+}
+function prefetch(file, priority) {
+  return taken[file] ? null : download(file, priority);
+}
+
+async function loadImage(blob) {
   if ('createImageBitmap' in window) {
     try {
       return await createImageBitmap(blob, { premultiplyAlpha: 'none', colorSpaceConversion: 'none' });
@@ -1019,10 +1072,28 @@ function frame(now) {
   state.raf = 0;
   if (state.frozen) return;       // a check or recording is drawing exact frames itself
   if (!state.ready) { state.lastTime = 0; return; }
+  const target = params.has('s') ? parseFloat(params.get('s')) : state.target;
+  // Below the opening the stage has scrolled away.  Settle on its last frame, drawn once, and
+  // stop: drawing frames nobody can see only takes the GPU from the page being read.  The
+  // bag glows again if the reader comes back up.
+  if (target >= state.heroEnd) {
+    state.lastTime = 0;
+    state.glowStart = 0;
+    hero.classList.remove('is-waiting');
+    if (state.full && state.s !== state.heroEnd) {
+      state.s = state.heroEnd;
+      state.glow = 0;
+      render();
+      updateYear();
+      placeCard3(state.s);
+      placeYear(state.s);
+      placeRing(state.s);
+    }
+    return;
+  }
   if (state.lastTime && state.full) judgeFrame(now - state.lastTime);
   const dt = Math.min(0.05, (now - (state.lastTime || now)) / 1000);
   state.lastTime = now;
-  const target = params.has('s') ? parseFloat(params.get('s')) : state.target;
   const needLapse = !state.full && target > TIMES.lapse[0] - 0.05;
   const goal = needLapse ? Math.min(target, TIMES.lapse[0] - 0.05) : target;
   hero.classList.toggle('is-waiting', needLapse);
@@ -1057,11 +1128,15 @@ function updateYear() {
 }
 
 const CROPPED = ['p1610', 'occ', 'stage', 'p1850', 'p1980', 'now'];   // exist in -tall versions
-const CRITICAL = ['p1610', 'occ', 'boats', 'poly', 'bag'];            // the first screen
-const REST = ['stage', 'p1850', 'p1980', 'launch', 'now'];            // the time-lapse, in order
+const hasFleet = (cfg) => !!(cfg && cfg.fleet && cfg.fleet.length);
+// The first screen.  With Islam Khan's fleet at anchor, the boats sheet is not needed until the
+// years start (its dinghy gives way to the fleet's escort boat), so it waits its turn.
+const criticalKeys = (cfg) => ['p1610', 'occ', hasFleet(cfg) ? 'fleet' : 'boats', 'poly', 'bag'];
+// The time-lapse, in the order it needs them.
+const restKeys = (cfg) => ['stage', 'p1850'].concat(hasFleet(cfg) ? ['boats'] : [], ['p1980', 'launch', 'now']);
+const fileFor = (key, set = state.set) => (CROPPED.indexOf(key) >= 0 && set === 'tall' ? `${key}-tall` : key);
 const loadTex = async (key) => {
-  const file = CROPPED.indexOf(key) >= 0 && state.set === 'tall' ? `${key}-tall` : key;
-  const img = await loadImage(`assets/hero/${file}.webp`);
+  const img = await loadImage(await take(fileFor(key)));
   if (gl.isContextLost()) { release(img); return; }
   if (state.tex[key]) gl.deleteTexture(state.tex[key].t);
   state.tex[key] = upload(img);
@@ -1078,21 +1153,20 @@ async function prepare() {
   await setupGL();
   state.tex.blank = placeholder();
   layout();
-  const critical = CRITICAL.slice();
-  if (state.cfg.fleet && state.cfg.fleet.length) critical.push('fleet');
-  await Promise.all(critical.map(loadTex));
+  await Promise.all(criticalKeys(state.cfg).map(loadTex));
   if (gen !== state.gen) return;              // lost again in the meantime
   state.ready = true;
   hero.classList.add('is-live');
   kick();
 
   // Everything the time-lapse needs, in the order it is needed.
+  const rest = restKeys(state.cfg);
   let done = 0;
-  for (const k of REST) {
+  for (const k of rest) {
     await loadTex(k);
     if (gen !== state.gen) return;
     done += 1;
-    loadingBar.style.transform = `scaleX(${done / REST.length})`;
+    loadingBar.style.transform = `scaleX(${done / rest.length})`;
     kick();
   }
   state.full = true;
@@ -1119,6 +1193,7 @@ let fellBack = false;
 function fallback(jpeg) {
   if (fellBack) return;
   fellBack = true;
+  queue.length = 0;                   // the animation's pictures are not needed after all
   state.ready = false;
   hero.classList.remove('is-live');
   const now = document.createElement('div');
@@ -1143,12 +1218,17 @@ function fallback(jpeg) {
   lapse();
 }
 
+const heroConfig = fetch('assets/hero/hero.json').then((r) => r.json());
+heroConfig.catch(() => {});   // handled where it is awaited; this only silences the no-WebGL path
+// The photographic opening, which is the first frame.  Nothing else is fetched before it.
+const opening = new Image();
+const openingLoaded = new Promise((resolve) => { opening.onload = resolve; opening.onerror = resolve; });
+opening.src = `assets/hero/opening${chooseSet() === 'tall' ? '-tall' : ''}.webp`;
+
 async function main() {
-  const cfg = fetch('assets/hero/hero.json').then((r) => r.json());
-  cfg.catch(() => {});   // handled where it is awaited; this only silences the no-WebGL path
+  const cfg = heroConfig;
   // Paint the complete photographic opening before preparing the animation renderer.
-  const opening = new Image();
-  opening.src = `assets/hero/opening${chooseSet() === 'tall' ? '-tall' : ''}.webp`;
+  await openingLoaded;
   if (opening.decode) await opening.decode().catch(() => {});
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   // No multisampling or depth buffer: the scene is flat pictures with soft edges, and both
@@ -1252,6 +1332,18 @@ function startRenderer() {
   return startup;
 }
 webp.then((ok) => { if (!ok) startRenderer(); });   // show the JPEG opening straight away
+// Once the opening picture is in, fetch the animation's pictures in the order they are needed:
+// the first screen's alone, so they share the connection with nothing, then the time-lapse's.
+if (window.WebGLRenderingContext) {
+  Promise.all([webp, heroConfig, openingLoaded]).then(([ok, cfg]) => {
+    if (!ok || fellBack) return null;
+    const set = state.set || chooseSet();
+    const first = criticalKeys(cfg).map((k) => prefetch(fileFor(k, set), 'high'));
+    return Promise.all(first).catch(() => {}).then(() => {
+      for (const k of restKeys(cfg)) prefetch(fileFor(k, set), 'low');
+    });
+  }).catch(() => {});
+}
 // The static opening already shows the first frame, so the renderer is prepared a moment after
 // the page has loaded, while the reader takes in the first card, or at once if they start
 // scrolling.  On a slow phone it is then ready before the bag falls.
