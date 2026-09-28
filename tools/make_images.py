@@ -26,7 +26,7 @@ SOURCES = {
     'Mehedi Hasan_3.JPG': 'kamrangirchar-riverbank-waste',
     'Rashed Sumon_1.jpg': 'kazla-canal-excavator',
     'Rashed Sumon_2.jpg': 'old-buriganga-channel-overgrown',
-    'Palash Khan_2.jpg': 'old-buriganga-channel-waste',
+    'Rashed_Sumon_3.JPG': 'kalyanpur-canal-child-collecting',
 }
 WIDTHS = (640, 1280, 1920)
 SRGB = ImageCms.createProfile('sRGB')
