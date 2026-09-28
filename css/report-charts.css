@@ -46,7 +46,7 @@
 .waffle-cell { aspect-ratio: 1; transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out); }
 .waffle-cell--recycled, .chart-swatch--recycled { background: var(--brick); }
 .waffle-cell--unrecycled, .chart-swatch--unrecycled { background: var(--ink); }
-.js .report-chart--recycling:not(.is-in) .waffle-cell { opacity: 0; transform: scale(0.6); }
+.reveal-on .report-chart--recycling:not(.is-in) .waffle-cell { opacity: 0; transform: scale(0.6); }
 .waffle-unit { margin: 14px 0 0; font-size: 0.875rem; color: var(--ink-3); }
 .recycling-finding { display: flex; align-items: baseline; gap: 14px; margin: 0; }
 .recycling-finding strong { font-size: clamp(4.5rem, 2.6rem + 7vw, 8.5rem); line-height: 0.82; font-weight: 300; letter-spacing: -0.06em; color: var(--brick); }
@@ -78,7 +78,7 @@
 }
 /* The drawing covers the panel's width and at least --fl-min-w, bottom edge to bottom edge. */
 .fl-bg {
-  position: absolute; z-index: -1; inset: 0; pointer-events: none;
+  position: absolute; z-index: -1; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none;
   background: var(--fl-image) var(--fl-x, 50%) 100% / max(100%, var(--fl-min-w)) auto no-repeat;
 }
 .fl-heading { max-width: 62rem; margin: 0 0 clamp(18px, 2.4vw, 28px); }
@@ -131,8 +131,8 @@
   font-variant-numeric: tabular-nums; color: var(--fl-ink); text-shadow: var(--halo);
   transition: opacity 0.4s ease 0.55s;
 }
-.js .fl-chart--percapita:not(.is-in) .pc-bar { transform: scaleY(0); }
-.js .fl-chart--percapita:not(.is-in) .pc-val { opacity: 0; }
+.reveal-on .fl-chart--percapita:not(.is-in) .pc-bar { transform: scaleY(0); }
+.reveal-on .fl-chart--percapita:not(.is-in) .pc-val { opacity: 0; }
 /* While one year's note is open, the other years' bars step back. */
 .pc-plot.has-tip .pc-year:not(.is-tipped) .pc-bar { opacity: 0.35; }
 
@@ -186,8 +186,14 @@
   width: auto; margin-top: clamp(10px, 1.6vw, 16px); padding: 7px 0 0;
   border-top: 1.5px dotted #536555; background: none; box-shadow: none; color: #1f1b1b; text-shadow: var(--halo);
 }
-.js .fl-chart--sundarbans .pg-icons { transition: opacity 0.6s var(--ease-out) 0.15s, transform 0.8s var(--ease-out) 0.15s; }
-.js .fl-chart--sundarbans:not(.is-in) .pg-icons { opacity: 0; transform: translate3d(0, 14px, 0); }
+.reveal-on .fl-chart--sundarbans .pg-icons { transition: opacity 0.6s var(--ease-out) 0.15s, transform 0.8s var(--ease-out) 0.15s; }
+.reveal-on .fl-chart--sundarbans:not(.is-in) .pg-icons { opacity: 0; transform: translate3d(0, 14px, 0); }
+
+/* Browsers without aspect-ratio (Safari before 15) still get square cells and 3:4 bottles. */
+@supports not (aspect-ratio: 1) {
+  .waffle-cell { height: 0; padding-bottom: 100%; }
+  .pg-i { height: 0; padding-bottom: 33.333%; }
+}
 
 /* ---------------------------------------------------------------- chart notes
    One note for the page, fixed to the viewport; report.js fills it and keeps it on screen. */
@@ -220,10 +226,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .waffle-cell, .pc-bar, .pc-val, .pg-icons, .pg-i, .chart-tip { transition: none !important; }
-  .js .report-chart--recycling:not(.is-in) .waffle-cell,
-  .js .fl-chart--percapita:not(.is-in) .pc-bar,
-  .js .fl-chart--percapita:not(.is-in) .pc-val,
-  .js .fl-chart--sundarbans:not(.is-in) .pg-icons { opacity: 1; transform: none; }
+  .reveal-on .report-chart--recycling:not(.is-in) .waffle-cell,
+  .reveal-on .fl-chart--percapita:not(.is-in) .pc-bar,
+  .reveal-on .fl-chart--percapita:not(.is-in) .pc-val,
+  .reveal-on .fl-chart--sundarbans:not(.is-in) .pg-icons { opacity: 1; transform: none; }
 }
 @media print {
   .waffle-cell, .time-bar--pet, .fl-chart, .fl-bg, .fl-chip, .pc-bar, .pg-i { print-color-adjust: exact; -webkit-print-color-adjust: exact; }

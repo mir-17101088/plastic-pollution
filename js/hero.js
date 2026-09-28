@@ -13,6 +13,10 @@
  *             real bag lying in the photograph, and never moves again.
  *
  * Scroll drives everything; nothing plays on a clock.  Frames are drawn only when needed.
+ *
+ * Old and slow phones: the code avoids syntax newer than 2017 (no ?. or ??) so older browsers
+ * can run it, never reads the layout while scrolling, lowers its own resolution if frames
+ * come too slowly (see quality), and rebuilds itself if the phone takes the GPU away.
  */
 
 const DW = 1600;
@@ -69,7 +73,7 @@ function placeRing(s) {
   if (on <= 0) return;
   const [cx, cy] = state.cfg.bag.center;
   const [x0, y0, vw] = state.view;
-  const k = stage.clientWidth / vw;
+  const k = state.cw / vw;
   const r = Math.round(clamp(RING_R * k, 32, 72));
   const box = r + 5;
   if (r !== state.ringR) {
@@ -90,16 +94,17 @@ function placeRing(s) {
 // Screen position of the third card for scroll position s, in px from the top of the stage.
 function card3Top(s) {
   const [a, b] = TIMES.lapse;
-  return stage.clientHeight * (1 - (s - a) / (b - a));
+  return state.ch * (1 - (s - a) / (b - a));
 }
 // Scroll position at which the third card has left the top of the screen.
 function card3Gone() {
   const [a, b] = TIMES.lapse;
-  return b + (b - a) * (card3.offsetHeight / stage.clientHeight);
+  return b + (b - a) * (state.card3H / state.ch);
 }
 function placeCard3(s) {
-  const y = Math.min(stage.clientHeight + 20, card3Top(s));
-  card3.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+  const y = Math.min(state.ch + 20, card3Top(s));
+  const t = `translate3d(0, ${y.toFixed(1)}px, 0)`;
+  if (t !== state.card3T) { state.card3T = t; card3.style.transform = t; }
 }
 
 // Years along the time-lapse, tau in [0, 1].
@@ -557,10 +562,47 @@ async function compile(vsSrc, fsSrc) {
 const state = {
   set: null, cfg: null, tex: {}, ready: false, gridCount: 0,
   s: 0, target: 0, lastYear: null, raf: 0, lastTime: 0, view: [0, 0, DW, DH], dpr: 1,
+  cw: 1, ch: 1, card3H: 0, heroTop: 0, card3T: '', gen: 0, redraw: 0,
 };
 
+// Sizes are read once per resize and never while scrolling, so no frame waits for a layout.
+function measure() {
+  const cw = stage.clientWidth;
+  const ch = stage.clientHeight;
+  const changed = cw !== state.cw || ch !== state.ch;
+  state.cw = cw;
+  state.ch = ch;
+  state.card3H = card3.offsetHeight;
+  state.heroTop = hero.getBoundingClientRect().top + window.pageYOffset;
+  return changed;
+}
+measure();
+
+// ------------------------------------------------------------------ quality
+// The picture is drawn at up to 2 device pixels per CSS pixel and 4.2 million pixels in all.
+// A device that says it is low-end starts with a smaller budget, and any device that cannot
+// keep up while the reader scrolls steps down: first the sharpening pass goes, then the
+// resolution drops a little at a time.  It never steps back up, so it cannot flicker.  Only
+// the sharpness changes; the picture and its timing stay exactly the same.
+const quality = { budget: 4.2e6, scale: 1, sharpen: true, steps: 0, samples: [] };
+const SLOW_FRAME_MS = 40;             // slower than 25 frames a second
+function judgeFrame(ms) {
+  if (quality.steps >= 4 || !(ms > 0) || ms > 500) return;   // > 500: the tab was in the background
+  const s = quality.samples;
+  s.push(ms);
+  if (s.length < 30) return;
+  s.sort((a, b) => a - b);
+  const typical = s[15];
+  s.length = 0;
+  if (typical < SLOW_FRAME_MS) return;
+  quality.steps += 1;
+  if (quality.sharpen) quality.sharpen = false;
+  else quality.scale = Math.max(0.5, quality.scale * 0.8);
+  layout();
+}
+
 function chooseSet() {
-  const a = stage.clientWidth / stage.clientHeight;
+  const a = state.cw / state.ch;
   return DH * a <= 700 ? 'tall' : 'wide';
 }
 
@@ -578,9 +620,19 @@ async function loadImage(url) {
     } catch (e) { /* fall through */ }
   }
   const img = new Image();
-  img.src = URL.createObjectURL(blob);
-  await img.decode();
+  const src = URL.createObjectURL(blob);
+  img.src = src;
+  if (img.decode) await img.decode();
+  else await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+  img.revoke = () => URL.revokeObjectURL(src);
   return img;
+}
+
+// Once a picture is on the GPU, its decoded copy is released straight away: on a phone with
+// little memory, holding a dozen of them is what gets the page's GPU context taken away.
+function release(img) {
+  if (img.close) img.close();
+  if (img.revoke) img.revoke();
 }
 
 function upload(img, { mip = true } = {}) {
@@ -640,9 +692,11 @@ async function setupGL() {
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE);
 }
 
+const quadData = new Float32Array(8);   // reused every draw: no garbage while scrolling
 function quad(prog, pts) {
+  quadData.set(pts);
   gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
-  gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(pts));
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, quadData);
   gl.enableVertexAttribArray(prog.a);
   gl.vertexAttribPointer(prog.a, 2, gl.FLOAT, false, 0, 0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -925,12 +979,21 @@ function glowAt(now) {
 
 // ------------------------------------------------------------------ layout, scroll, loop
 function layout() {
-  const cw = stage.clientWidth;
-  const ch = stage.clientHeight;
+  const cw = state.cw;
+  const ch = state.ch;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const scale = Math.min(dpr, Math.sqrt(4.2e6 / (cw * ch)));
-  canvas.width = Math.round(cw * scale);
-  canvas.height = Math.round(ch * scale);
+  const scale = Math.min(dpr, Math.sqrt(quality.budget / (cw * ch))) * quality.scale;
+  const w = Math.max(1, Math.round(cw * scale));
+  const h = Math.max(1, Math.round(ch * scale));
+  // Resizing a canvas throws its picture and GPU buffers away, so only do it for a real change
+  // (a phone's address bar showing or hiding fires resize without one).
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+    // Safari does not show the first frame drawn into a resized canvas: draw a few more.
+    state.redraw = 3;
+    if (state.ready && !state.raf) state.raf = requestAnimationFrame(frame);
+  }
   state.dpr = scale;
   const a = cw / ch;
   let vw, vh;
@@ -945,17 +1008,18 @@ function layout() {
   poster.style.backgroundImage = `url(assets/hero/opening${state.set === 'tall' ? '-tall' : ''}.webp)`;
   poster.style.backgroundSize = `${tr[2] * k}px ${DH * k}px`;
   poster.style.backgroundPosition = `${(tr[0] - x0) * k}px ${-y0 * k}px`;
-  state.sharpen = cw * scale > 1400 ? 0.35 : 0.2;
+  state.sharpen = !quality.sharpen ? 0 : cw * scale > 1400 ? 0.35 : 0.2;
 }
 
 function scrollPos() {
-  const r = hero.getBoundingClientRect();
-  return Math.max(0, -r.top / stage.clientHeight);
+  return Math.max(0, (window.pageYOffset - state.heroTop) / state.ch);
 }
 
 function frame(now) {
   state.raf = 0;
   if (state.frozen) return;       // a check or recording is drawing exact frames itself
+  if (!state.ready) { state.lastTime = 0; return; }
+  if (state.lastTime && state.full) judgeFrame(now - state.lastTime);
   const dt = Math.min(0.05, (now - (state.lastTime || now)) / 1000);
   state.lastTime = now;
   const target = params.has('s') ? parseFloat(params.get('s')) : state.target;
@@ -972,7 +1036,8 @@ function frame(now) {
   placeYear(state.s);
   placeRing(state.s);
   const glowing = state.glowStart && (now - state.glowStart) / 1000 < GLOW_SECONDS;
-  if (state.s !== goal || glowing) state.raf = requestAnimationFrame(frame);
+  if (state.redraw > 0) state.redraw -= 1;
+  if (state.s !== goal || glowing || state.redraw > 0) state.raf = requestAnimationFrame(frame);
   else state.lastTime = 0;
 }
 
@@ -992,12 +1057,47 @@ function updateYear() {
 }
 
 const CROPPED = ['p1610', 'occ', 'stage', 'p1850', 'p1980', 'now'];   // exist in -tall versions
+const CRITICAL = ['p1610', 'occ', 'boats', 'poly', 'bag'];            // the first screen
+const REST = ['stage', 'p1850', 'p1980', 'launch', 'now'];            // the time-lapse, in order
 const loadTex = async (key) => {
-  const file = CROPPED.includes(key) && state.set === 'tall' ? `${key}-tall` : key;
+  const file = CROPPED.indexOf(key) >= 0 && state.set === 'tall' ? `${key}-tall` : key;
   const img = await loadImage(`assets/hero/${file}.webp`);
+  if (gl.isContextLost()) { release(img); return; }
   if (state.tex[key]) gl.deleteTexture(state.tex[key].t);
   state.tex[key] = upload(img);
+  release(img);
 };
+
+// Programs, buffers and pictures on the GPU.  Runs at the start, and again if the phone takes
+// the GPU context away (low memory, app switch) and later gives it back.
+async function prepare() {
+  const gen = ++state.gen;
+  state.ready = false;
+  state.full = false;
+  state.tex = {};
+  await setupGL();
+  state.tex.blank = placeholder();
+  layout();
+  const critical = CRITICAL.slice();
+  if (state.cfg.fleet && state.cfg.fleet.length) critical.push('fleet');
+  await Promise.all(critical.map(loadTex));
+  if (gen !== state.gen) return;              // lost again in the meantime
+  state.ready = true;
+  hero.classList.add('is-live');
+  kick();
+
+  // Everything the time-lapse needs, in the order it is needed.
+  let done = 0;
+  for (const k of REST) {
+    await loadTex(k);
+    if (gen !== state.gen) return;
+    done += 1;
+    loadingBar.style.transform = `scaleX(${done / REST.length})`;
+    kick();
+  }
+  state.full = true;
+  kick();
+}
 
 // A phone turned sideways needs the full-width pictures.
 async function widen() {
@@ -1013,72 +1113,99 @@ async function widen() {
   kick();
 }
 
-// Without WebGL, the reader still sees 1610 give way to today.
-function fallback() {
+// Without WebGL, the reader still sees 1610 give way to today, and the years still count.
+// Browsers that cannot show WebP (Safari before 14) get JPEG copies of the two pictures.
+let fellBack = false;
+function fallback(jpeg) {
+  if (fellBack) return;
+  fellBack = true;
+  state.ready = false;
+  hero.classList.remove('is-live');
   const now = document.createElement('div');
   now.className = 'hero-poster hero-poster--now';
-  poster.after(now);
+  poster.parentNode.insertBefore(now, poster.nextSibling);
+  if (jpeg === true) {
+    const tall = chooseSet() === 'tall' ? '-tall' : '';
+    poster.style.backgroundImage = `url(assets/hero/opening${tall}.jpg)`;
+    now.style.backgroundImage = `url(assets/hero/now${tall}.jpg)`;
+  }
+  let queued = 0;
   const lapse = () => {
+    queued = 0;
     const s = scrollPos();
     now.style.opacity = String(smooth(range(s, TIMES.lapse[0] + 0.3, TIMES.lapse[1])));
     placeCard3(s);
     placeYear(s);
+    state.s = s;
+    updateYear();
   };
-  addEventListener('scroll', lapse, { passive: true });
+  addEventListener('scroll', () => { if (!queued) queued = requestAnimationFrame(lapse); }, { passive: true });
   lapse();
 }
 
 async function main() {
+  const cfg = fetch('assets/hero/hero.json').then((r) => r.json());
+  cfg.catch(() => {});   // handled where it is awaited; this only silences the no-WebGL path
   // Paint the complete photographic opening before preparing the animation renderer.
   const opening = new Image();
   opening.src = `assets/hero/opening${chooseSet() === 'tall' ? '-tall' : ''}.webp`;
-  await opening.decode().catch(() => {});
+  if (opening.decode) await opening.decode().catch(() => {});
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  gl = canvas.getContext('webgl2', { alpha: false, antialias: true, premultipliedAlpha: false })
-    || canvas.getContext('webgl', { alpha: false, antialias: true, premultipliedAlpha: false });
-  isGL2 = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
-  if (!gl) { fallback(); return; }
-  state.cfg = await (await fetch('assets/hero/hero.json')).json();
-  state.set = chooseSet();
-  await setupGL();
-  state.tex.blank = placeholder();
-  layout();
-
-  // The first screen: the 1610 plate, its boats and what hides them, and the bag.
-  const critical = ['p1610', 'occ', 'boats', 'poly', 'bag'];
-  if (state.cfg.fleet && state.cfg.fleet.length) critical.push('fleet');
-  const rest = ['stage', 'p1850', 'p1980', 'launch', 'now'];
-  await Promise.all(critical.map(loadTex));
-  state.ready = true;
-  hero.classList.add('is-live');
-  kick();
-
-  // Everything the time-lapse needs, in the order it is needed.
-  let done = 0;
-  const total = rest.length;
-  for (const k of rest) {
-    await loadTex(k);
-    done += 1;
-    loadingBar.style.transform = `scaleX(${done / total})`;
-    kick();
+  // No multisampling or depth buffer: the scene is flat pictures with soft edges, and both
+  // cost old GPUs a lot.  A software renderer (a GPU the browser does not trust) still gets
+  // the animation, but small enough to keep up.
+  const attrs = { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, failIfMajorPerformanceCaveat: true };
+  gl = canvas.getContext('webgl2', attrs) || canvas.getContext('webgl', attrs);
+  if (!gl) {
+    attrs.failIfMajorPerformanceCaveat = false;
+    gl = canvas.getContext('webgl2', attrs) || canvas.getContext('webgl', attrs);
+    if (gl) { quality.budget = 0.5e6; quality.sharpen = false; }
   }
-  state.full = true;
-  kick();
+  if (!gl) { fallback(); return; }
+  isGL2 = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
+  // Old GPUs: a smaller picture from the start.  deviceMemory is only reported by Chromium.
+  if ((navigator.deviceMemory && navigator.deviceMemory <= 2) || gl.getParameter(gl.MAX_TEXTURE_SIZE) < 4096) {
+    quality.budget = Math.min(quality.budget, 1.2e6);
+    quality.sharpen = false;
+  }
+  state.cfg = await cfg;
+  state.set = chooseSet();
+  await prepare();
+}
+
+function fail(e) {
+  console.error(e);
+  fallback();
 }
 
 addEventListener('scroll', kick, { passive: true });
+// Resize fires constantly on phones while the address bar slides; only a real change of size
+// (or a phone turned sideways) redoes the layout, at most once a frame.
+let resizeQueued = 0;
 addEventListener('resize', () => {
-  if (!state.cfg) return;
-  if (state.set === 'tall' && chooseSet() === 'wide') { widen(); return; }
-  layout();
-  kick();
+  if (resizeQueued) return;
+  resizeQueued = requestAnimationFrame(() => {
+    resizeQueued = 0;
+    const changed = measure();
+    if (!state.cfg || fellBack) return;
+    if (state.set === 'tall' && chooseSet() === 'wide') { widen().catch(fail); return; }
+    if (changed) layout();
+    kick();
+  });
 });
+// Web fonts can change the third card's height, which sets when the bag glows.
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 canvas.addEventListener('webglcontextlost', (e) => {
-  e.preventDefault();
-  hero.classList.remove('is-live');   // the poster shows through
+  e.preventDefault();                 // ask for the context back
+  state.gen += 1;                     // abandon any loading in progress
   state.ready = false;
+  hero.classList.remove('is-live');   // the poster shows through meanwhile
 });
-reduceMotion.addEventListener?.('change', kick);
+canvas.addEventListener('webglcontextrestored', () => {
+  if (state.cfg && !fellBack) prepare().catch(fail);
+});
+if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', kick);
+else if (reduceMotion.addListener) reduceMotion.addListener(kick);
 document.querySelectorAll('a[href="#story"]').forEach((a) => a.addEventListener('click', (e) => {
   e.preventDefault();
   const story = document.getElementById('story');
@@ -1087,7 +1214,7 @@ document.querySelectorAll('a[href="#story"]').forEach((a) => a.addEventListener(
 }));
 
 window.__hero = {
-  state, TIMES, FLEET, card3Gone, placeCard3, start: startRenderer,
+  state, quality, TIMES, FLEET, card3Gone, placeCard3, start: startRenderer,
   render: () => { render(); updateYear(); },
   // Draw scroll position s exactly, with the glow at `glow` (0..1), for checks and recordings.
   show: (s, glow = 0) => {
@@ -1108,18 +1235,35 @@ window.__hero = {
     const [cx, cy] = state.cfg.bag.center;
     const d = [cx + pose.x * BAG_K, cy - pose.h * 131];
     const [x0, y0, vw] = state.view;
-    const k = stage.clientWidth / vw;
+    const k = state.cw / vw;
     return [(d[0] - x0) * k, (d[1] - y0) * k, f];
   },
 };
+// Can this browser show WebP?  (A 1 x 1 WebP; Safari before 14 cannot.)
+const webp = new Promise((resolve) => {
+  const img = new Image();
+  img.onload = () => resolve(img.width > 0);
+  img.onerror = () => resolve(false);
+  img.src = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+});
 let startup;
 function startRenderer() {
-  if (!startup) startup = main().catch((e) => { console.error(e); hero.classList.remove('is-live'); fallback(); });
+  if (!startup) startup = webp.then((ok) => (ok ? main() : fallback(true))).catch(fail);
   return startup;
 }
-// The static opening already contains the fleet. Only prepare the interactive renderer
-// when the reader engages with the page, avoiding a GPU startup stall while they read.
+webp.then((ok) => { if (!ok) startRenderer(); });   // show the JPEG opening straight away
+// The static opening already shows the first frame, so the renderer is prepared a moment after
+// the page has loaded, while the reader takes in the first card, or at once if they start
+// scrolling.  On a slow phone it is then ready before the bag falls.
 for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown', 'scroll']) {
   addEventListener(event, startRenderer, { once: true, passive: true });
 }
-if (scrollY > 0 || location.hash || params.has('s')) startRenderer();
+if (window.pageYOffset > 0 || location.hash || params.has('s')) startRenderer();
+else {
+  const whenIdle = () => {
+    if (window.requestIdleCallback) requestIdleCallback(startRenderer, { timeout: 2500 });
+    else setTimeout(startRenderer, 1200);
+  };
+  if (document.readyState === 'complete') whenIdle();
+  else addEventListener('load', whenIdle, { once: true });
+}

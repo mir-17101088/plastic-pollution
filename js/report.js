@@ -1,19 +1,8 @@
-// Share URLs are constructed locally. Nothing is sent until a reader opens a link.
-const shareUrl = new URL(location.href);
-shareUrl.hash = '';
-shareUrl.search = '';
-const reportTitle = 'A city changes. Plastic remains. | The Daily Star';
-const url = shareUrl.href;
-const destinations = {
-  facebook: ['https://www.facebook.com/sharer/sharer.php', { u: url }],
-  x: ['https://twitter.com/intent/tweet', { url, text: reportTitle }],
-  whatsapp: ['https://api.whatsapp.com/send', { text: `${reportTitle} ${url}` }],
-  linkedin: ['https://www.linkedin.com/sharing/share-offsite/', { url }],
-};
-for (const anchor of document.querySelectorAll('[data-share]')) {
-  const [base, params] = destinations[anchor.dataset.share];
-  anchor.href = `${base}?${new URLSearchParams(params)}`;
-}
+// The report after the opening: figure entrances, chart notes, the photographs, the live
+// polythene count and the back-to-top button.
+//
+// Written for older phone browsers too (Safari 12+, Chrome 61+): no optional chaining, no ??,
+// nothing that needs a build step.  Keep it that way when editing.
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -21,14 +10,18 @@ const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // ------------------------------------------------------------------ figures enter once
-const revealer = new IntersectionObserver((entries) => {
-  for (const e of entries) {
-    if (!e.isIntersecting) continue;
-    e.target.classList.add('is-in');
-    revealer.unobserve(e.target);
-  }
-}, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
-document.querySelectorAll('.reveal').forEach((el) => revealer.observe(el));
+// Figures start hidden only once this has run (reveal-on), so they can never stay invisible.
+if ('IntersectionObserver' in window) {
+  const revealer = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.classList.add('is-in');
+      revealer.unobserve(e.target);
+    }
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach((el) => revealer.observe(el));
+  document.documentElement.classList.add('reveal-on');
+}
 
 // ------------------------------------------------------------------ chart notes
 // A bar pair or a bottle stack carries a short note ([data-tip]), as in the Flourish originals.
@@ -86,7 +79,7 @@ if (tipTargets.length) {
   let lastPointer = 'mouse';
   document.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; }, { passive: true });
   document.addEventListener('click', (e) => {
-    const target = e.target.closest?.('[data-tip]');
+    const target = e.target.closest ? e.target.closest('[data-tip]') : null;
     if (!target) { hideTip(); return; }
     if (lastPointer !== 'mouse' && tipFor === target) { hideTip(); return; }
     showTip(target, e.clientX, e.clientY);
@@ -253,17 +246,162 @@ if (live && endNum && ending && dock && story) {
   document.addEventListener('visibilitychange', wake);
   wake();
 }
+// ------------------------------------------------------------------ back to top
+// Checked at most once a frame, and the button is only touched when it has to change.
 const backToTop = document.querySelector('.back-to-top');
+let backToTopRaf = 0;
 function updateBackToTop() {
-  if (backToTop) backToTop.hidden = story.getBoundingClientRect().top >= innerHeight;
+  backToTopRaf = 0;
+  const hide = story.getBoundingClientRect().top >= innerHeight;
+  if (backToTop.hidden !== hide) backToTop.hidden = hide;
 }
-addEventListener('scroll', updateBackToTop, { passive: true });
-addEventListener('resize', updateBackToTop);
-updateBackToTop();
-backToTop?.addEventListener('click', (event) => {
-  event.preventDefault();
-  window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+function queueBackToTop() {
+  if (!backToTopRaf) backToTopRaf = requestAnimationFrame(updateBackToTop);
+}
+if (backToTop && story) {
+  addEventListener('scroll', queueBackToTop, { passive: true });
+  addEventListener('resize', queueBackToTop);
   updateBackToTop();
-  const firstLink = document.querySelector('.brand');
-  firstLink?.focus({ preventScroll: true });
-});
+  backToTop.addEventListener('click', (event) => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    queueBackToTop();
+    const firstLink = document.querySelector('.brand');
+    if (firstLink) firstLink.focus({ preventScroll: true });
+  });
+}
+
+// ------------------------------------------------------------------ photographs
+// The browser scrolls the row itself (scroll snap), so a swipe is as smooth as the page.  This
+// adds the dots and the autoplay, and fetches each photograph just before it is needed: the
+// first two once the row comes near the screen, then always the next one.
+//
+// Autoplay: a new photograph every 2 seconds while the row is on screen.  Any interaction (a
+// swipe, a dot, the arrow keys, the mouse moving over the photographs) pauses it, and it resumes
+// 5 seconds after the last one.  Keyboard focus inside the row holds it until focus leaves.  It
+// stays off while the tab is hidden and for readers whose system asks for reduced motion.
+const AUTOPLAY_MS = 2000;
+const RESUME_MS = 5000;
+const focusVisible = (el) => {
+  try { return el.matches(':focus-visible'); } catch (e) { return false; }
+};
+
+for (const carousel of document.querySelectorAll('[data-carousel]')) {
+  const track = carousel.querySelector('.carousel-track');
+  const slides = Array.prototype.slice.call(track.children);
+  const controls = carousel.querySelector('.carousel-controls');
+  const dots = Array.prototype.slice.call(carousel.querySelectorAll('[data-carousel-dot]'));
+  let current = 0;
+  let near = false;        // close enough to the screen to start fetching photographs
+  let onScreen = false;    // visible enough for autoplay
+  let focused = false;
+  let lastMove = 0;
+  let ticking = 0;
+  let timer = 0;
+
+  const warm = (i) => {
+    const img = slides[i] && slides[i].querySelector('img');
+    if (img && img.getAttribute('loading') === 'lazy') img.setAttribute('loading', 'eager');
+  };
+  // Distance from one slide to the next, read from the layout so gaps and widths never matter.
+  const step = () => (slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : track.clientWidth) || 1;
+  const show = (i) => {
+    current = i;
+    dots.forEach((dot, k) => {
+      if (k === i) dot.setAttribute('aria-current', 'true');
+      else dot.removeAttribute('aria-current');
+    });
+    if (near) { warm(i); warm(i + 1); }
+  };
+  const go = (i) => {
+    const left = clamp(i, 0, slides.length - 1) * step();
+    if (track.scrollTo) track.scrollTo({ left, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    else track.scrollLeft = left;
+  };
+
+  // Autoplay.
+  const canPlay = () => onScreen && !focused && !document.hidden && !reduceMotion.matches;
+  const schedule = (delay) => {
+    clearTimeout(timer);
+    timer = canPlay() ? setTimeout(advance, delay) : 0;
+  };
+  function advance() {
+    go((current + 1) % slides.length);   // after the last photograph, back to the first
+    schedule(AUTOPLAY_MS);
+  }
+  const interacted = () => schedule(RESUME_MS);
+
+  track.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = requestAnimationFrame(() => {
+      ticking = 0;
+      const i = clamp(Math.round(track.scrollLeft / step()), 0, slides.length - 1);
+      if (i !== current) show(i);
+    });
+  }, { passive: true });
+  // A reader's own hand on the row: touch, pen, mouse button, or a sideways trackpad swipe
+  // (the page scrolling past under a mouse wheel does not count).
+  for (const type of ['pointerdown', 'touchstart']) {
+    track.addEventListener(type, interacted, { passive: true });
+  }
+  track.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) interacted();
+  }, { passive: true });
+  dots.forEach((dot, k) => dot.addEventListener('click', () => { go(k); interacted(); }));
+  // Arrow keys step exactly one photograph when the row has focus.
+  track.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    go(current + (e.key === 'ArrowRight' ? 1 : -1));
+    interacted();
+  });
+  // The mouse moving over the photographs counts too (checked a few times a second at most);
+  // a mouse left resting on them does not hold autoplay beyond the 5 seconds.  Safari reports
+  // a "move" whenever a photograph slides under a still cursor, so only a changed position counts.
+  let lastX = -1;
+  let lastY = -1;
+  carousel.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const moved = Math.abs(e.screenX - lastX) + Math.abs(e.screenY - lastY) > 2;
+    lastX = e.screenX;
+    lastY = e.screenY;
+    if (!moved || e.timeStamp - lastMove < 250) return;
+    lastMove = e.timeStamp;
+    interacted();
+  }, { passive: true });
+  // So does keyboard focus; focus left behind by a click or tap does not.
+  carousel.addEventListener('focusin', (e) => {
+    focused = focusVisible(e.target);
+    if (focused) schedule(0);
+  });
+  carousel.addEventListener('focusout', (e) => {
+    if (e.relatedTarget && carousel.contains(e.relatedTarget)) return;
+    if (!focused) return;
+    focused = false;
+    interacted();
+  });
+  document.addEventListener('visibilitychange', () => schedule(AUTOPLAY_MS));
+  if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', () => schedule(AUTOPLAY_MS));
+
+  const wakeUp = () => { near = true; warm(current); warm(current + 1); };
+  if ('IntersectionObserver' in window) {
+    const nearby = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      nearby.disconnect();
+      wakeUp();
+    }, { rootMargin: '600px 0px' });
+    nearby.observe(carousel);
+    // Autoplay only while most of the photograph is on screen.
+    const visible = new IntersectionObserver((entries) => {
+      const e = entries[entries.length - 1];
+      const was = onScreen;
+      onScreen = e.isIntersecting && e.intersectionRatio >= 0.5;
+      if (onScreen !== was) schedule(AUTOPLAY_MS);
+    }, { threshold: [0, 0.5, 0.75] });
+    visible.observe(track);
+  } else {
+    wakeUp();
+  }
+  controls.hidden = false;
+  show(0);
+}

@@ -46,7 +46,7 @@
   margin: 0; font-size: 0.8125rem; line-height: 1.35; font-weight: 600;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3);
 }
-.story a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); transition: text-decoration-color 0.15s ease; }
+.story a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; text-decoration-color: rgba(17, 21, 27, 0.4); text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); transition: text-decoration-color 0.15s ease; }
 .story a:hover { text-decoration-color: currentColor; }
 .story :focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 
@@ -150,12 +150,51 @@
 }
 .voice figcaption strong { font-weight: 600; color: var(--ink); }
 
-/* -------------------------------------------------------------------- photograph */
-.bleed { margin: var(--space-section) 0 0; }
-.bleed img { display: block; width: 100%; height: clamp(340px, 60vw, 88vh); object-fit: cover; object-position: 52% 55%; }
-.bleed figcaption {
-  width: min(calc(100% - 2 * var(--gutter)), var(--wide)); margin: 14px auto 0;
-  font-size: 0.875rem; line-height: 1.5; color: var(--ink-3);
+/* -------------------------------------------------------------------- photographs
+   A row of photographs the browser scrolls itself (scroll snap), so a swipe is as smooth as the
+   page.  report.js adds the dots and the autoplay; without it the row still swipes.  Each frame
+   is 3:2 with the picture cropped to fill it, so the dots sit at the same place on every slide. */
+.photo-carousel { width: min(calc(100% - 2 * var(--gutter)), var(--wide)); margin: var(--space-section) auto 0; }
+.carousel-stage { position: relative; }
+.carousel-track {
+  display: flex; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-track:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.carousel-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+.carousel-slide + .carousel-slide { margin-left: 16px; }
+.carousel-slide figure { margin: 0; }
+.carousel-frame { position: relative; height: 0; padding-bottom: 66.6667%; overflow: hidden; background: #dcdcd6; }
+.carousel-frame img { position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.carousel-slide figcaption { max-width: 46rem; padding-top: 14px; }
+.carousel-caption { margin: 0; font-size: 0.9375rem; line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.carousel-date { margin: 6px 0 0; font-size: 0.8125rem; line-height: 1.4; color: var(--ink-3); }
+/* The dots lie over the bottom of the picture, in a box as tall as the 3:2 frame.  Each dot is a
+   28 px target around an 8 px mark; the current one stretches into a short bar. */
+.carousel-controls { position: absolute; top: 0; left: 0; right: 0; height: 0; padding-bottom: 66.6667%; pointer-events: none; }
+.carousel-controls[hidden] { display: none; }
+.carousel-dots {
+  position: absolute; left: 50%; bottom: 12px; display: flex; padding: 0 4px; border-radius: 999px;
+  background: rgba(12, 32, 31, 0.5); transform: translateX(-50%); pointer-events: auto;
+}
+.carousel-dot {
+  position: relative; width: 28px; height: 28px; margin: 0; padding: 0; border: 0;
+  background: none; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.carousel-dot::before {
+  content: ''; position: absolute; top: 10px; left: 10px; width: 8px; height: 8px; border-radius: 4px;
+  background: rgba(244, 244, 241, 0.55); transition: background-color 0.25s ease, width 0.25s ease, left 0.25s ease;
+}
+.carousel-dot:hover::before { background: rgba(244, 244, 241, 0.85); }
+.carousel-dot[aria-current="true"]::before { left: 5px; width: 18px; background: #f4f4f1; }
+.carousel-dot:focus-visible { outline: 2px solid #f4f4f1; outline-offset: -3px; border-radius: 999px; }
+@media (max-width: 600px) {
+  .photo-carousel { width: 100%; }
+  .carousel-slide + .carousel-slide { margin-left: 0; }
+  .carousel-slide figcaption { padding: 12px var(--gutter) 0; }
+  .carousel-dots { bottom: 8px; }
 }
 
 /* -------------------------------------------------------------------- policy targets: each promise against the latest figure
@@ -184,8 +223,8 @@
 /* Banned, but not shown to be enforced: the bar is hatched. */
 .pledge--paper .pledge-fill { background-image: repeating-linear-gradient(135deg, transparent 0 6px, rgba(251, 248, 242, 0.34) 6px 9px); }
 /* Moving away from the target: the bar is an arrow. */
-.pledge-fill--arrow { clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); }
-.js .policy-targets:not(.is-in) .pledge-fill { transform: scaleX(0); }
+.pledge-fill--arrow { -webkit-clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); }
+.reveal-on .policy-targets:not(.is-in) .pledge-fill { transform: scaleX(0); }
 .pledge-mark, .pledge-zero { position: absolute; top: -9px; bottom: -6px; left: var(--at); }
 .pledge-mark { width: 0; border-left: 2px dashed var(--ink); }
 .pledge-zero { left: 50%; width: 2px; margin-left: -1px; background: var(--ink); }
@@ -259,23 +298,36 @@
 .report-notes p { margin: 16px 0; }
 .report-notes ul { display: grid; gap: 12px; margin: 22px 0; padding: 22px 0; list-style: none; border-block: 1px solid var(--rule); }
 
+/* The masthead, the credits under it in a single column, then a bar with the copyright and the
+   Daily Star's own channels.  The bottom padding keeps the floating back-to-top button clear of
+   the social links. */
 .report-footer {
-  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
-  padding: 36px var(--gutter, 20px) max(28px, env(safe-area-inset-bottom));
-  background: #e7e7e3; font-family: var(--font);
+  padding: 40px var(--gutter, 20px) 76px; padding-bottom: max(76px, env(safe-area-inset-bottom));
+  background: #0c201f; color: #eef0e7; font-family: var(--font);
 }
-.footer-identity img { display: block; width: 150px; height: auto; }
-.footer-identity p, .footer-sharing > p { margin: 14px 0 0; font-size: 0.8125rem; color: #55595e; }
-.footer-sharing > p { margin: 0 0 8px; text-align: right; }
-.social-links { display: flex; gap: 2px; }
+.footer-logo { display: inline-block; line-height: 0; }
+.footer-logo img { display: block; width: 150px; height: auto; filter: brightness(0) invert(1); }
+.footer-credits { margin: 22px 0 0; padding: 0; list-style: none; }
+.footer-credits li { font-size: 0.9375rem; line-height: 1.45; color: #eef0e7; }
+.footer-credits li + li { margin-top: 6px; }
+.footer-credits span { color: #bacbc5; }
+.footer-bar {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  margin-top: 28px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.footer-bar > * + * { margin-left: 24px; }
+.footer-copy { margin: 0; font-size: 0.8125rem; color: #bacbc5; }
+.social-links { display: flex; margin: 0; padding: 0; list-style: none; }
+.social-links li + li { margin-left: 2px; }
 .social-links a { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; transition: background-color 0.15s ease; }
-.social-links a:hover { background: rgba(17, 21, 27, 0.07); }
-.social-links img { display: block; opacity: 0.85; }
-.report-footer :focus-visible { outline: 2px solid #11151b; outline-offset: 3px; }
+.social-links a:hover { background: rgba(255, 255, 255, 0.09); }
+.social-links img { display: block; opacity: 0.9; filter: brightness(0) invert(1); }
+.report-footer :focus-visible { outline: 2px solid #efb17f; outline-offset: 3px; }
 
 /* -------------------------------------------------------------------- entrances */
-.js .reveal { opacity: 0; transform: translate3d(0, 18px, 0); transition: opacity 0.6s var(--ease-out), transform 0.7s var(--ease-out); }
-.js .reveal.is-in { opacity: 1; transform: none; }
+/* reveal-on is set by report.js, so nothing stays hidden if the script cannot run. */
+.reveal-on .reveal { opacity: 0; transform: translate3d(0, 18px, 0); transition: opacity 0.6s var(--ease-out), transform 0.7s var(--ease-out); }
+.reveal-on .reveal.is-in { opacity: 1; transform: none; }
 
 /* -------------------------------------------------------------------- with and without JavaScript */
 .no-js { display: none; }
@@ -293,32 +345,31 @@ html:not(.js) .bag-band__num.no-js { display: block; }
   .bag-dock__num { font-size: 1.25rem; }
   .bag-dock__unit { display: none; }
   .bag-dock__label { display: block; font-size: 0.75rem; line-height: 1.25; white-space: nowrap; color: #b4b5b8; }
-  .footer-identity img { width: 172px; }
+  .footer-logo img { width: 172px; }
 }
 @media (max-width: 520px) {
   .story-meta p { padding: 0 12px; font-size: 0.875rem; }
-  .report-footer { flex-direction: column; align-items: flex-start; }
-  .footer-sharing > p { text-align: left; }
-  .social-links { margin-left: -12px; }
+  .footer-bar { display: block; }
+  .footer-bar > * + * { margin: 12px 0 0 -10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal-on .reveal { opacity: 1; transform: none; transition: none; }
   .pledge-fill { transition: none; }
-  .js .policy-targets:not(.is-in) .pledge-fill { transform: none; }
+  .reveal-on .policy-targets:not(.is-in) .pledge-fill { transform: none; }
   .bag-dock { transition: opacity 0.2s linear; transform: none; }
   .ending__num { transition: opacity 0.2s linear; }
   .js .ending.is-waiting .ending__num { transform: none; }
-  .story a, .social-links a { transition: none; }
+  .story a, .social-links a, .carousel-dot::before { transition: none; }
 }
 
 @media print {
-  .hero, .bag-dock, .footer-sharing { display: none; }
+  .hero, .bag-dock, .footer-follow, .carousel-controls { display: none; }
   .bag-band, .ending { background: none; color: #000; }
   .ending__num { color: #000; }
   .voice { box-shadow: none; border: 1px solid #999; }
   figure { break-inside: avoid; }
-  .js .reveal { opacity: 1; transform: none; }
+  .reveal-on .reveal { opacity: 1; transform: none; }
 }
 /* Section variations: paper, river green and warm copper. */
 .story-head { padding-top: clamp(56px, 8vh, 88px); }
@@ -343,15 +394,6 @@ html:not(.js) .bag-band__num.no-js { display: block; }
 .report-notes[open] summary::after { content: '−'; }
 .report-notes summary:hover { background: #e5e8df; }
 .report-notes__content { padding-top: 12px; }
-.report-footer { background: #0c201f; color: #eef0e7; align-items: flex-end; flex-wrap: wrap; }
-.footer-sharing { margin-left: auto; align-self: flex-end; }
-.footer-identity { align-self: flex-start; }
-.footer-sharing > p { text-align: right; }
-.footer-sharing .social-links { margin: 0; }
-.footer-identity img, .social-links img { filter: brightness(0) invert(1); }
-.footer-identity p, .footer-sharing > p { color: #bacbc5; }
-.social-links a:hover { background: #ffffff18; }
-.report-footer :focus-visible { outline-color: #efb17f; }
 .back-to-top { position: fixed; z-index: 35; right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #b8c5bd; border-radius: 50%; background: #f4f4f1; color: #173d35; box-shadow: 0 3px 12px #0c201f18; transition: background .2s, color .2s; }
 .back-to-top[hidden] { display: none; }
 .back-to-top:hover { background: #173d35; color: #f4f4f1; }
@@ -379,12 +421,6 @@ html:not(.js) .bag-band__num.no-js { display: block; }
 @media (max-width: 520px) {
   .policy-targets { padding-inline: 18px; }
   .pledge-facts { flex-direction: column; gap: 4px; }
-  .report-footer { gap: 24px; }
-  .social-links { margin-left: -10px; }
 }
 @media print { .report-notes__content { display: block; } .back-to-top { display: none; } }
 
-.bleed--inspection img { height: auto; object-fit: contain; }
-.bleed--inspection picture { display: block; }
-/* Keep the floating control clear of the footer social links. */
-.report-footer { padding-bottom: max(76px, env(safe-area-inset-bottom)); }
