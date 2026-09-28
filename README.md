@@ -110,13 +110,16 @@ Optional: add this line to the domain's existing root `robots.txt` (do not repla
 
 ## Vercel preview
 
-The repository deploys to Vercel as it is: `vercel.json` tells Vercel there is nothing to install
-or build, so it publishes the files exactly as they are in the repository.
+The repository deploys to Vercel as it is. `vercel.json` tells Vercel there is nothing to
+install, and its only build step copies the website files (`index.html`, `favicon.svg`,
+`logo.svg`, `sitemap.xml`, `css/`, `js/`, `assets/`) unchanged into a `public/` folder, which is
+what Vercel publishes. `vercel.json` sets this itself, so it overrides whatever Build Command or
+Output Directory the Vercel project settings contain. Never commit a `public/` folder.
 
 1. Upload everything in this folder to the root of a GitHub repository (the website files sit at
    the top level, next to `vercel.json`).
-2. In Vercel: **Add New → Project**, import the repository, Framework Preset **Other**, and leave
-   Build Command, Output Directory and Root Directory at their defaults. Deploy.
+2. In Vercel: **Add New → Project**, import the repository, Framework Preset **Other**, Root
+   Directory the repository root. Deploy.
 3. The page is at the root of the Vercel address (`https://<your-project>.vercel.app/`);
    `/plastic-pollution/` redirects there.
 

@@ -6,3 +6,6 @@ __pycache__/
 Thumbs.db
 # Full-size original photographs are not needed to host the site; keep them out of the repository.
 originals/
+
+# Built by Vercel from the files above; never commit it.
+public/
